@@ -35,7 +35,7 @@ func (engine *Engine) Static(prefix string, fs embed.FS) {
 		c.Redirect(301, prefix+"/")
 	})
 }
-func (engine *Engine) Api(prefix string) *RouterGroup {
+func (engine *Engine) Api(prefix string, controllers map[string]any) *RouterGroup {
 	// API 路由
 	api := engine.Group(prefix)
 	api.GET("/info", func(c *gin.Context) {
@@ -43,7 +43,11 @@ func (engine *Engine) Api(prefix string) *RouterGroup {
 			"time": time.Now().Unix(),
 		})
 	})
-	return &RouterGroup{
+	apix := &RouterGroup{
 		RouterGroup: api,
 	}
+	for prefix, c := range controllers {
+		apix.AddRouter(prefix, c)
+	}
+	return apix
 }
