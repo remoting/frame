@@ -4,7 +4,6 @@ import (
 	"crypto"
 	"crypto/rand"
 	"crypto/rsa"
-	"crypto/sha256"
 	"crypto/x509"
 	"encoding/base64"
 	"encoding/pem"
@@ -65,115 +64,59 @@ func GenerateRsaKey(bits int) error {
 	return nil
 }
 
-// RSAEncrypt rsa加密
-// src 要加密的数据
-// 公钥文件的路径
-func RSAEncrypt(src, filename []byte) []byte {
-	// 1. 根据文件名将文件内容从文件中读出
-	file, err := os.Open(string(filename))
-	if err != nil {
-		return nil
-	}
-	// 2. 读文件
-	info, _ := file.Stat()
-	allText := make([]byte, info.Size())
-	file.Read(allText)
-	// 3. 关闭文件
-	file.Close()
-
-	// 4. 从数据中查找到下一个PEM格式的块
-	block, _ := pem.Decode(allText)
+// RSASign RSA sign
+func RSASign(src []byte, priKey []byte, hash crypto.Hash) (string, error) {
+	block, _ := pem.Decode(priKey)
 	if block == nil {
-		return nil
+		return "", errors.New("key is invalid format")
 	}
-	// 5. 解析一个DER编码的公钥
-	pubInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
-	if err != nil {
-		return nil
-	}
-	pubKey := pubInterface.(*rsa.PublicKey)
 
-	// 6. 公钥加密
-	result, _ := rsa.EncryptPKCS1v15(rand.Reader, pubKey, src)
-	return result
+	// x509 parse
+	privateKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
+	if err != nil {
+		return "", err
+	}
+
+	h := hash.New()
+	_, err = h.Write(src)
+	if err != nil {
+		return "", err
+	}
+
+	bytes := h.Sum(nil)
+	sign, err := rsa.SignPKCS1v15(rand.Reader, privateKey, hash, bytes)
+	if err != nil {
+		return "", err
+	}
+
+	return base64.StdEncoding.EncodeToString(sign), nil
 }
 
-// RSADecrypt rsa加密
-// src 要解密的数据
-// 私钥文件的路径
-func RSADecrypt(src, filename []byte) []byte {
-	// 1. 根据文件名将文件内容从文件中读出
-	file, err := os.Open(string(filename))
-	if err != nil {
-		return nil
-	}
-	// 2. 读文件
-	info, _ := file.Stat()
-	allText := make([]byte, info.Size())
-	file.Read(allText)
-	// 3. 关闭文件
-	file.Close()
-	// 4. 从数据中查找到下一个PEM格式的块
-	block, _ := pem.Decode(allText)
-	// 5. 解析一个pem格式的私钥
-	privateKey, _ := x509.ParsePKCS1PrivateKey(block.Bytes)
-	// 6. 私钥解密
-	result, _ := rsa.DecryptPKCS1v15(rand.Reader, privateKey, src)
-
-	return result
-}
-
-func Rsa2PriSign(signContent string, privateKey string, hash crypto.Hash) string {
-	shaNew := hash.New()
-	shaNew.Write([]byte(signContent))
-	hashed := shaNew.Sum(nil)
-	priKey, err := parsePrivateKey(privateKey)
-	if err != nil {
-		return ""
-	}
-
-	signature, err := rsa.SignPKCS1v15(rand.Reader, priKey, hash, hashed)
-	if err != nil {
-		return ""
-	}
-	return base64.StdEncoding.EncodeToString(signature)
-}
-func parsePrivateKey(privateKey string) (*rsa.PrivateKey, error) {
-	block, _ := pem.Decode([]byte(privateKey))
+// RSAVerify RSA verify
+func RSAVerify(src, pubKey []byte, sign string, hash crypto.Hash) error {
+	block, _ := pem.Decode(pubKey)
 	if block == nil {
-		return nil, errors.New("私钥信息错误！")
+		return errors.New("key is invalid format")
 	}
-	priKey, err := x509.ParsePKCS1PrivateKey(block.Bytes)
-	if err != nil {
-		return nil, err
-	}
-	return priKey, nil
-}
 
-// RSA2公钥验证签名
-func Rsa2PubCheckSign(signContent, sign, publicKey string, hash crypto.Hash) bool {
-	hashed := sha256.Sum256([]byte(signContent))
-	pubKey, err := parsePublicKey(publicKey)
+	// x509 parse
+	publicKeyInterface, err := x509.ParsePKIXPublicKey(block.Bytes)
 	if err != nil {
-		return false
+		return err
 	}
-	sig, _ := base64.StdEncoding.DecodeString(sign)
-	err = rsa.VerifyPKCS1v15(pubKey, hash, hashed[:], sig)
-	if err != nil {
-		return false
-	}
-	return true
-}
 
-// 解析公钥
-func parsePublicKey(publicKey string) (*rsa.PublicKey, error) {
-	block, _ := pem.Decode([]byte(publicKey))
-	if block == nil {
-		return nil, errors.New("公钥信息错误！")
+	publicKey, ok := publicKeyInterface.(*rsa.PublicKey)
+	if !ok {
+		return errors.New("the kind of key is not a rsa.PublicKey")
 	}
-	pubKey, err := x509.ParsePKIXPublicKey(block.Bytes)
+
+	h := hash.New()
+	_, err = h.Write(src)
 	if err != nil {
-		return nil, err
+		return err
 	}
-	return pubKey.(*rsa.PublicKey), nil
+
+	bytes := h.Sum(nil)
+	_sign, _ := base64.StdEncoding.DecodeString(sign)
+	return rsa.VerifyPKCS1v15(publicKey, hash, bytes, _sign)
 }
