@@ -103,7 +103,7 @@ func RSAGeneratePublicKey(priKey []byte, out io.Writer) error {
 }
 
 // RSAEncrypt RSA encrypt
-func RSAEncrypt(src, pubKey []byte) ([]byte, error) {
+func RSAEncryptByPubKey(src, pubKey []byte) ([]byte, error) {
 	block, _ := pem.Decode(pubKey)
 	if block == nil {
 		return nil, errors.New("key is invalid format")
@@ -129,7 +129,7 @@ func RSAEncrypt(src, pubKey []byte) ([]byte, error) {
 }
 
 // RSADecrypt RSA decrypt
-func RSADecrypt(src, priKey []byte) ([]byte, error) {
+func RSADecryptByPriKey(src, priKey []byte) ([]byte, error) {
 	block, _ := pem.Decode(priKey)
 	if block == nil {
 		return nil, errors.New("key is invalid format")
