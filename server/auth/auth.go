@@ -25,6 +25,11 @@ type UserInfo interface {
 type UserInfoService interface {
 	GetUserInfoById(userId string) (UserInfo, error)
 }
+type AuthConfig struct {
+	UserService   UserInfoService
+	TokenSecret   string
+	AnonymousPath []string
+}
 
 func isAnonymousPath(path string) bool {
 	if path == "/" {
@@ -43,23 +48,32 @@ func CORSMiddleware() gin.HandlerFunc {
 		c.Next()
 	}
 }
+func GetAuthHandlerFunc(config AuthConfig) gin.HandlerFunc {
+	return Auth(config.UserService, config.TokenSecret, config.AnonymousPath)
+}
 func Auth(service UserInfoService, secret string, paths []string) gin.HandlerFunc {
 	tokenSecret = secret
 	anonymousPath = paths
 	return func(c *gin.Context) {
 		_token := getTokenByRequest(c)
-		userInfo := getUserByRequest(c, service)
-		if userInfo == nil {
+		_userInfo := getUserByRequest(c, service)
+		// 将当前用户信息放在 request 对象上，方便后面的控制器获取当前用户
+		c.Set("__userInfo__", _userInfo)
+		c.Set("__token__", _token)
+		if _userInfo == nil {
+			// 未登陆用户判断是否是匿名允许访问的路径
 			if isAnonymousPath(c.Request.URL.Path) {
 				c.Next()
 			} else {
 				c.JSON(401, "未认证用户，不能访问")
 			}
 		} else {
-			// 将当前用户信息放在 request 对象上，方便后面的控制器获取当前用户
-			c.Set("__userInfo__", userInfo)
-			c.Set("__token__", _token)
-			c.Next()
+			// 已登陆用户判断是否有当前URL的访问权限
+			if authorization(c) {
+				c.Next()
+			} else {
+				c.JSON(403, "未认证用户，不能访问")
+			}
 		}
 	}
 }
