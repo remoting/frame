@@ -9,6 +9,7 @@ import (
 	"github.com/remoting/frame/server/auth"
 )
 
+type HandlerFunc func(*Context)
 type Engine struct {
 	*gin.Engine
 }
@@ -31,8 +32,22 @@ func (engine *Engine) Static(prefix string, fs embed.FS) {
 		staticServer := http.FileServer(http.FS(fs))
 		staticServer.ServeHTTP(c.Writer, c.Request)
 	})
-	engine.GET("/", func(c *gin.Context) {
+	engine.GET("/", func(c *Context) {
 		c.Redirect(301, prefix+"/")
+	})
+}
+func (engine *Engine) GET(relativePath string, handlerFunc HandlerFunc) {
+	engine.Engine.GET(relativePath, func(c *gin.Context) {
+		handlerFunc(&Context{
+			Context: c,
+		})
+	})
+}
+func (engine *Engine) POST(relativePath string, handlerFunc HandlerFunc) {
+	engine.Engine.POST(relativePath, func(c *gin.Context) {
+		handlerFunc(&Context{
+			Context: c,
+		})
 	})
 }
 func (engine *Engine) Api(prefix string, controllers map[string]any) *RouterGroup {

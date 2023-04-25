@@ -18,6 +18,9 @@ func main() {
 	app.Use(auth.GetAuthHandlerFunc(authConfig()))
 	// 开启静态文件服务
 	app.StaticFS("/ui", http.Dir("./ui"))
+	app.GET("/", func(c *web.Context) {
+		c.Redirect(301, "/ui/")
+	})
 	// 创建API路由
 	app.Api("/api", controller.GetControllers())
 	app.Run(":8080")
