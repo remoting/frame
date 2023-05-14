@@ -9,6 +9,7 @@ import (
 	"github.com/remoting/frame/server/auth"
 )
 
+type M map[string]any
 type HandlerFunc func(*Context)
 type Engine struct {
 	*gin.Engine
