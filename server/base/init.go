@@ -1,11 +1,13 @@
 package base
 
 import (
+	"errors"
 	"fmt"
 
 	"github.com/remoting/frame/json"
 	"github.com/remoting/frame/server/web"
 	"github.com/remoting/frame/util"
+	"gorm.io/driver/mysql"
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
@@ -19,10 +21,10 @@ func InitDB(dbType, dbDsn string, models []any) (*gorm.DB, error) {
 		db, err = gorm.Open(sqlite.Open(dbDsn), &gorm.Config{
 			Logger: logger.Default.LogMode(logger.Info),
 		})
+	} else if dbType == "mysql" {
+		db, err = gorm.Open(mysql.Open(dbDsn), &gorm.Config{})
 	} else {
-		db, err = gorm.Open(sqlite.Open(dbDsn), &gorm.Config{
-			Logger: logger.Default.LogMode(logger.Info),
-		})
+		err = errors.New("dbType error")
 	}
 	if err != nil {
 		fmt.Print("数据库连接错误:", err)
