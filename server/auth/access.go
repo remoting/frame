@@ -9,6 +9,8 @@ func authorization(c *gin.Context) bool {
 		if ok {
 			if info.IsAdmin() {
 				return true
+			}else{
+				return true
 			}
 		}
 	}

@@ -72,7 +72,7 @@ func Auth(service UserInfoService, secret string, paths []string) gin.HandlerFun
 			if authorization(c) {
 				c.Next()
 			} else {
-				c.JSON(403, "未认证用户，不能访问")
+				c.JSON(403, "未授权用户，不能访问")
 			}
 		}
 	}
