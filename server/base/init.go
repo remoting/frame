@@ -32,7 +32,10 @@ func InitDB(dbType, dbDsn string, models []any) (*gorm.DB, error) {
 	}
 	for _, model := range models {
 		err1 := db.AutoMigrate(model)
-		fmt.Print("数据库初始化错误:", err1)
+		if err != nil {
+			fmt.Print("数据库初始化错误:", err1)
+			return nil, err1
+		}
 	}
 	return db, nil
 }
