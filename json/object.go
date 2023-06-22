@@ -5,6 +5,7 @@ import (
 )
 
 type Object map[string]interface{}
+type Array []interface{}
 
 func NewObject() Object {
 	return Object{}
@@ -13,6 +14,14 @@ func (json Object) GetObject(name string) Object {
 	if obj, ok1 := json[name]; ok1 {
 		if ret, ok := obj.(map[string]interface{}); ok {
 			//jsonObject := (Object)ret
+			return ret
+		}
+	}
+	return nil
+}
+func (json Object) GetArray(name string) Array {
+	if obj, ok1 := json[name]; ok1 {
+		if ret, ok := obj.([]interface{}); ok {
 			return ret
 		}
 	}
