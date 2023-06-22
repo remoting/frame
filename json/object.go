@@ -7,6 +7,24 @@ import (
 type Object map[string]interface{}
 type Array []interface{}
 
+func (array Array) Size() int {
+	return len(array)
+}
+func (array Array) GetArray(i int) Array {
+	obj := array[i]
+	if ret, ok := obj.([]interface{}); ok {
+		return ret
+	}
+	return nil
+}
+
+func (array Array) GetObject(i int) Object {
+	obj := array[i]
+	if ret, ok := obj.(map[string]interface{}); ok {
+		return ret
+	}
+	return nil
+}
 func NewObject() Object {
 	return Object{}
 }
