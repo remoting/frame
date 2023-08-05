@@ -20,15 +20,24 @@ type UserInfo interface {
 	UserName() string
 	GetMenus() []*json.Node
 	GetRoles() []*json.Dict
+	GetTenant() []UserTenant
 	IsAdmin() bool
+}
+type UserTenant interface {
+	TenantId() string
+	TenantName() string
 }
 type UserInfoService interface {
 	GetUserInfoById(userId string) (UserInfo, error)
+}
+type AuthService interface {
+	Authorization(c *gin.Context) bool
 }
 type AuthConfig struct {
 	UserService   UserInfoService
 	TokenSecret   string
 	AnonymousPath []string
+	AuthService   AuthService
 }
 
 func isAnonymousPath(path string) bool {
@@ -49,9 +58,12 @@ func CORSMiddleware() gin.HandlerFunc {
 	}
 }
 func GetAuthHandlerFunc(config AuthConfig) gin.HandlerFunc {
-	return Auth(config.UserService, config.TokenSecret, config.AnonymousPath)
+	if config.AuthService == nil {
+		config.AuthService = &DefaultAuthService{}
+	}
+	return Auth(config.UserService, config.AuthService, config.TokenSecret, config.AnonymousPath)
 }
-func Auth(service UserInfoService, secret string, paths []string) gin.HandlerFunc {
+func Auth(service UserInfoService, authService AuthService, secret string, paths []string) gin.HandlerFunc {
 	tokenSecret = secret
 	anonymousPath = paths
 	return func(c *gin.Context) {
@@ -69,7 +81,8 @@ func Auth(service UserInfoService, secret string, paths []string) gin.HandlerFun
 			}
 		} else {
 			// 已登陆用户判断是否有当前URL的访问权限
-			if authorization(c) {
+
+			if authService.Authorization(c) {
 				c.Next()
 			} else {
 				c.JSON(403, "未授权用户，不能访问")
