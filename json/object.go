@@ -28,10 +28,18 @@ func (array Array) GetObject(i int) Object {
 func NewObject() Object {
 	return Object{}
 }
+func ToObject(obj map[string]interface{}) Object {
+	return obj
+}
+func ToArray(obj []interface{}) Array {
+	return obj
+}
 func (json Object) GetObject(name string) Object {
 	if obj, ok1 := json[name]; ok1 {
 		if ret, ok := obj.(map[string]interface{}); ok {
-			//jsonObject := (Object)ret
+			return ret
+		}
+		if ret, ok := obj.(Object); ok {
 			return ret
 		}
 	}
@@ -40,6 +48,9 @@ func (json Object) GetObject(name string) Object {
 func (json Object) GetArray(name string) Array {
 	if obj, ok1 := json[name]; ok1 {
 		if ret, ok := obj.([]interface{}); ok {
+			return ret
+		}
+		if ret, ok := obj.(Array); ok {
 			return ret
 		}
 	}

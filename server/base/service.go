@@ -13,6 +13,40 @@ func (service *BaseService[T]) GetDB() *gorm.DB {
 func GetDB() *gorm.DB {
 	return db
 }
+
+func QueryFirst[T any](sql string, params []any) (T, error) {
+	var obj T
+	if err := GetDB().Raw(sql, params...).First(&obj).Error; err != nil {
+		return obj, err
+	}
+	return obj, nil
+}
+func QueryList[T any](sql string, params []any) ([]T, error) {
+	var list []T
+	if err := GetDB().Raw(sql, params...).Scan(&list).Error; err != nil {
+		return nil, err
+	}
+	return list, nil
+}
+func ExecuteSQL(sql string, params []any) error {
+	if err := GetDB().Exec(sql, params...).Error; err != nil {
+		return err
+	}
+	return nil
+}
+func InsertRow(table string, row map[string]interface{}) error {
+	if err := GetDB().Table(table).Create(row).Error; err != nil {
+		return err
+	}
+	return nil
+}
+func UpdateRow(table, where string, params []interface{}, row map[string]interface{}) error {
+	if err := GetDB().Table(table).Where(where, params).Updates(row).Error; err != nil {
+		return err
+	}
+	return nil
+}
+
 func (service *BaseService[T]) PageSearch(filter *SearchFilter) (*SearchPaging[T], error) {
 	var list []T
 	var total int

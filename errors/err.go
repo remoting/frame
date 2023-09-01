@@ -7,7 +7,10 @@ type RestError struct {
 	Code int
 }
 
-func New(code int, msg string) RestError {
+func Is(err, target error) bool {
+	return errors.Is(err, target)
+}
+func NewRestError(code int, msg string) RestError {
 	return RestError{
 		error: errors.New(msg),
 		Code:  code,

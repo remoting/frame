@@ -41,7 +41,7 @@ func (c *Context) GetUserInfo() auth.UserInfo {
 }
 func (c *Context) Fail(code int, message string) {
 	//c.JSON(200, &Result{Code: code, Message: message})
-	panic(errors.New(code, message))
+	panic(errors.NewRestError(code, message))
 }
 
 func (c *Context) Success(data any) {

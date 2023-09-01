@@ -77,15 +77,24 @@ func Auth(service UserInfoService, authService AuthService, secret string, paths
 			if isAnonymousPath(c.Request.URL.Path) {
 				c.Next()
 			} else {
-				c.JSON(401, "未认证用户，不能访问")
+				c.JSON(401, map[string]interface{}{
+					"code": 401,
+					"msg":  "未认证用户，不能访问",
+					"data": "",
+				})
+				c.Abort()
 			}
 		} else {
 			// 已登陆用户判断是否有当前URL的访问权限
-
 			if authService.Authorization(c) {
 				c.Next()
 			} else {
-				c.JSON(403, "未授权用户，不能访问")
+				c.JSON(403, map[string]interface{}{
+					"code": 403,
+					"msg":  "未授权用户，不能访问",
+					"data": "",
+				})
+				c.Abort()
 			}
 		}
 	}
