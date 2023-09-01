@@ -14,6 +14,16 @@ func GetDB() *gorm.DB {
 	return db
 }
 
+// QueryFind 查询数据 如果未找到不会返回 Error
+func QueryFind[T any](sql string, params []any) (T, error) {
+	var obj T
+	if err := GetDB().Raw(sql, params...).Find(&obj).Error; err != nil {
+		return obj, err
+	}
+	return obj, nil
+}
+
+// QueryFirst 查询数据 如果未找到返回 Error
 func QueryFirst[T any](sql string, params []any) (T, error) {
 	var obj T
 	if err := GetDB().Raw(sql, params...).First(&obj).Error; err != nil {
