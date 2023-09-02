@@ -15,7 +15,7 @@ func GetDB() *gorm.DB {
 }
 
 // QueryFind 查询数据 如果未找到不会返回 Error
-func QueryFind[T any](sql string, params []any) (T, error) {
+func QueryFind[T any](sql string, params ...interface{}) (T, error) {
 	var obj T
 	if err := GetDB().Raw(sql, params...).Find(&obj).Error; err != nil {
 		return obj, err
@@ -24,21 +24,21 @@ func QueryFind[T any](sql string, params []any) (T, error) {
 }
 
 // QueryFirst 查询数据 如果未找到返回 Error
-func QueryFirst[T any](sql string, params []any) (T, error) {
+func QueryFirst[T any](sql string, params ...interface{}) (T, error) {
 	var obj T
 	if err := GetDB().Raw(sql, params...).First(&obj).Error; err != nil {
 		return obj, err
 	}
 	return obj, nil
 }
-func QueryList[T any](sql string, params []any) ([]T, error) {
+func QueryList[T any](sql string, params ...interface{}) ([]T, error) {
 	var list []T
 	if err := GetDB().Raw(sql, params...).Scan(&list).Error; err != nil {
 		return nil, err
 	}
 	return list, nil
 }
-func ExecuteSQL(sql string, params []any) error {
+func ExecuteSQL(sql string, params ...interface{}) error {
 	if err := GetDB().Exec(sql, params...).Error; err != nil {
 		return err
 	}
@@ -50,7 +50,7 @@ func InsertRow(table string, row map[string]interface{}) error {
 	}
 	return nil
 }
-func UpdateRow(table, where string, params []interface{}, row map[string]interface{}) error {
+func UpdateRow(table string, row map[string]interface{}, where string, params ...interface{}) error {
 	if err := GetDB().Table(table).Where(where, params).Updates(row).Error; err != nil {
 		return err
 	}
