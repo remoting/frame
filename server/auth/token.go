@@ -125,14 +125,14 @@ func getUserByRequest(r *gin.Context, service UserInfoService) UserInfo {
 }
 
 // Login 登录操作
-func Login(r http.ResponseWriter, userID string) errors.RestError {
+func Login(r http.ResponseWriter, userID string) (string, errors.RestError) {
 	token, err := genToken(userID)
 	if err != nil {
-		return errors.NewRestError(10, "Token生成错误")
+		return token,errors.NewRestError(10, "Token生成错误")
 	} else {
 		cookie := http.Cookie{Name: tokenName, Value: token, Path: "/"}
 		http.SetCookie(r, &cookie)
-		return errors.NewRestError(0, "")
+		return token,errors.NewRestError(0, "")
 	}
 }
 
