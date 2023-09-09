@@ -51,7 +51,7 @@ func InsertRow(table string, row map[string]interface{}) error {
 	return nil
 }
 func UpdateRow(table string, row map[string]interface{}, where string, params ...interface{}) error {
-	if err := GetDB().Table(table).Where(where, params).Updates(row).Error; err != nil {
+	if err := GetDB().Table(table).Where(where, params...).Updates(row).Error; err != nil {
 		return err
 	}
 	return nil
