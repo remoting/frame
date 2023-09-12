@@ -71,6 +71,22 @@ func (json Object) GetInt64(name string) int64 {
 	}
 	return t2
 }
+func (json Object) GetFloat32(name string) float32 {
+	var t2 float32
+	t1, ok := json[name]
+	if ok {
+		return util.Float32(t1)
+	}
+	return t2
+}
+func (json Object) GetFloat64(name string) float64 {
+	var t2 float64
+	t1, ok := json[name]
+	if ok {
+		return util.Float64(t1)
+	}
+	return t2
+}
 func (json Object) Contains(name string) bool {
 	_, ok := json[name]
 	return ok
