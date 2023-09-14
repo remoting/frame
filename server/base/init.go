@@ -89,7 +89,8 @@ type Paging struct {
 }
 type SearchFilter struct {
 	*Paging `json:"paging"`
-	Filter  map[string]any `json:"filter"`
+	Filter  map[string]any 		`json:"filter"`
+	Sort 	map[string]string 	`json:"sort"`
 }
 
 func (filter *SearchFilter) Offset() int {
