@@ -52,39 +52,42 @@ func IsEmptyStr(s interface{}) bool {
 }
 func Int(t1 interface{}) int {
 	var t2 int
-	switch t1.(type) {
-	case uint:
-		t2 = int(t1.(uint))
+	switch value := t1.(type) {
+	case int:
+		t2 = int(value)
 		break
 	case int8:
-		t2 = int(t1.(int8))
-		break
-	case uint8:
-		t2 = int(t1.(uint8))
+		t2 = int(value)
 		break
 	case int16:
-		t2 = int(t1.(int16))
-		break
-	case uint16:
-		t2 = int(t1.(uint16))
+		t2 = int(value)
 		break
 	case int32:
-		t2 = int(t1.(int32))
-		break
-	case uint32:
-		t2 = int(t1.(uint32))
+		t2 = int(value)
 		break
 	case int64:
-		t2 = int(t1.(int64))
+		t2 = int(value)
+		break
+	case uint:
+		t2 = int(value)
+		break
+	case uint8:
+		t2 = int(value)
+		break
+	case uint16:
+		t2 = int(value)
+		break
+	case uint32:
+		t2 = int(value)
 		break
 	case uint64:
-		t2 = int(t1.(uint64))
+		t2 = int(value)
 		break
 	case float32:
-		t2 = int(t1.(float32))
+		t2 = int(value)
 		break
 	case float64:
-		t2 = int(t1.(float64))
+		t2 = int(value)
 		break
 	case string:
 		t2, _ = strconv.Atoi(t1.(string))
@@ -146,39 +149,42 @@ func String(value interface{}) string {
 }
 func Int64(t1 interface{}) int64 {
 	var t2 int64
-	switch t1.(type) {
-	case uint:
-		t2 = int64(t1.(uint))
+	switch value := t1.(type) {
+	case int:
+		t2 = int64(value)
 		break
 	case int8:
-		t2 = int64(t1.(int8))
-		break
-	case uint8:
-		t2 = int64(t1.(uint8))
+		t2 = int64(value)
 		break
 	case int16:
-		t2 = int64(t1.(int16))
-		break
-	case uint16:
-		t2 = int64(t1.(uint16))
+		t2 = int64(value)
 		break
 	case int32:
-		t2 = int64(t1.(int32))
-		break
-	case uint32:
-		t2 = int64(t1.(uint32))
+		t2 = int64(value)
 		break
 	case int64:
-		t2 = int64(t1.(int64))
+		t2 = int64(value)
+		break
+	case uint:
+		t2 = int64(value)
+		break
+	case uint8:
+		t2 = int64(value)
+		break
+	case uint16:
+		t2 = int64(value)
+		break
+	case uint32:
+		t2 = int64(value)
 		break
 	case uint64:
-		t2 = int64(t1.(uint64))
+		t2 = int64(value)
 		break
 	case float32:
-		t2 = int64(t1.(float32))
+		t2 = int64(value)
 		break
 	case float64:
-		t2 = int64(t1.(float64))
+		t2 = int64(value)
 		break
 	case string:
 		_t2, _ := strconv.Atoi(t1.(string))
