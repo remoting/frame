@@ -31,7 +31,7 @@ func InitDB(dbType, dbDsn string, models []any) (*gorm.DB, error) {
 		return nil, err
 	}
 	for _, model := range models {
-		err1 := db.AutoMigrate(model)
+		err1 := db.Set("gorm:table_options", "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci").AutoMigrate(model)
 		if err1 != nil {
 			fmt.Print("数据库初始化错误:", err1)
 		}
@@ -89,8 +89,8 @@ type Paging struct {
 }
 type SearchFilter struct {
 	*Paging `json:"paging"`
-	Filter  map[string]any 		`json:"filter"`
-	Sort 	map[string]string 	`json:"sort"`
+	Filter  map[string]any    `json:"filter"`
+	Sort    map[string]string `json:"sort"`
 }
 
 func (filter *SearchFilter) Offset() int {
