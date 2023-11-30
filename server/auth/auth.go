@@ -15,10 +15,23 @@ var tokenName = "jwt-token"
 var anonymousPath []string
 var tokenSecret = ""
 
+type Menu struct {
+	Id       string  `json:"id"`
+	Prefix   string  `json:"prefix"`
+	Name     string  `json:"label"`
+	Type     string  `json:"type"`
+	Route    string  `json:"route"`
+	SubRoute string  `json:"subRoute" gorm:"column:sub_route"`
+	Icon     string  `json:"icon"`
+	ParentId string  `json:"parentId" gorm:"column:parent_id"`
+	Children []*Menu `json:"children" gorm:"-"`
+	Show     bool    `json:"-"`
+}
+
 type UserInfo interface {
 	UserId() string
 	UserName() string
-	GetMenus() []*json.Node
+	GetMenus() []*Menu
 	GetRoles() []*json.Dict
 	GetTenant() []UserTenant
 	IsAdmin() bool
