@@ -13,7 +13,7 @@ type UserCache struct {
 }
 
 // TokenCache 缓存用户与token的映射关系，后期需要定期清理功能
-var tokenCache map[string]*UserCache = make(map[string]*UserCache, 0)
+var tokenCache = make(map[string]*UserCache, 0)
 var lock = &sync.Mutex{}
 
 func Put(key string, userInfo *UserCache) {
