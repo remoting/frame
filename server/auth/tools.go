@@ -88,6 +88,6 @@ func Logout(r *gin.Context) {
 	r.SetCookie(tokenName, "", -1, "/", "", false, false)
 	token := authentication.getTokenByRequest(r)
 	if len(token) > 0 {
-		delete(TokenCache, token)
+		Del(token)
 	}
 }

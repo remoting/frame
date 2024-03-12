@@ -21,7 +21,11 @@ func Put(key string, userInfo *UserCache) {
 	defer lock.Unlock()
 	tokenCache[key] = userInfo
 }
-
+func Del(token string) {
+	lock.Lock()
+	defer lock.Unlock()
+	delete(tokenCache, token)
+}
 func Get(token string) UserInfo {
 	lock.Lock()
 	defer lock.Unlock()
