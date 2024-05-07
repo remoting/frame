@@ -5,6 +5,7 @@ import (
 	"github.com/remoting/frame/errors"
 	"github.com/remoting/frame/json"
 	"github.com/remoting/frame/server/auth"
+	"github.com/remoting/frame/util"
 )
 
 type Result struct {
@@ -27,7 +28,7 @@ func (c *Context) ParseJSON() *json.Object {
 	return obj
 }
 func (c *Context) CheckError(exception any) {
-	if exception != nil {
+	if !util.IsNil(exception) {
 		panic(exception)
 	}
 }

@@ -3,6 +3,7 @@ package util
 import (
 	"bytes"
 	"fmt"
+	"reflect"
 	"time"
 
 	"golang.org/x/crypto/ssh"
@@ -31,4 +32,12 @@ func RunCommand(client *ssh.Client, command string) (stdout string, err error) {
 	}
 	stdout = buf.String()
 	return
+}
+func IsNil(i interface{}) bool {
+	vi := reflect.ValueOf(i)
+	if vi.Kind() == reflect.Ptr {
+		return vi.IsNil()
+	} else {
+		return i == nil
+	}
 }
