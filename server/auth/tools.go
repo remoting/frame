@@ -4,8 +4,10 @@ import (
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/remoting/frame/errors"
+	"github.com/remoting/frame/logger"
 	"net/http"
 	"runtime"
+	"runtime/debug"
 )
 
 func CORSMiddleware() gin.HandlerFunc {
@@ -25,31 +27,31 @@ func ErrorHandler() gin.HandlerFunc {
 		defer func() {
 			if r := recover(); r != nil {
 				//打印错误堆栈信息
-				fmt.Println("error:========", r.(error).Error())
-				//debug.PrintStack()
-				switch r.(type) {
+				errMsg := fmt.Sprintf("%+v", r)
+				logger.Error("%s\n%s", errMsg, string(debug.Stack()))
+				switch _err := r.(type) {
 				case errors.RestError:
 					c.JSON(http.StatusOK, gin.H{
-						"code": r.(errors.RestError).Code,
-						"msg":  r.(errors.RestError).Error(),
-						"data": nil,
-					})
-				case error:
-					c.JSON(http.StatusOK, gin.H{
-						"code": 500,
-						"msg":  r.(error).Error(),
+						"code": _err.Code,
+						"msg":  _err.Error(),
 						"data": nil,
 					})
 				case runtime.Error:
 					c.JSON(http.StatusOK, gin.H{
 						"code": "500",
-						"msg":  r.(error).Error(),
+						"msg":  _err.Error(),
+						"data": nil,
+					})
+				case error:
+					c.JSON(http.StatusOK, gin.H{
+						"code": 500,
+						"msg":  _err.Error(),
 						"data": nil,
 					})
 				default:
 					c.JSON(http.StatusOK, gin.H{
 						"code": "500",
-						"msg":  "服务器错误",
+						"msg":  errMsg,
 						"data": nil,
 					})
 				}
