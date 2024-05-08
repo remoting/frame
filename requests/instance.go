@@ -2,6 +2,10 @@ package requests
 
 var _httpclient = NewHttpClient(30)
 
+func ConfigHttpClient(_client *HttpClient) {
+	_httpclient = _client
+}
+
 func Get(url string, params, header map[string]string) (*HttpResponse, error) {
 	return _httpclient.Get(url, params, header)
 }
