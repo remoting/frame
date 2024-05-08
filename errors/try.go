@@ -1,6 +1,9 @@
 package errors
 
-import "fmt"
+import (
+	"fmt"
+	"github.com/remoting/frame/reflect"
+)
 
 func TryError(tryFunc func() error) (err error) {
 	defer func() {
@@ -19,7 +22,7 @@ func TryCatch[T any](tryFunc func() (T, error)) (t T, err error) {
 	return tryFunc()
 }
 func TryThrow(err error) {
-	if err != nil {
+	if !reflect.IsNil(err) {
 		panic(err)
 	}
 }
