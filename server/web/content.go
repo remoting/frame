@@ -4,8 +4,8 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/remoting/frame/errors"
 	"github.com/remoting/frame/json"
+	"github.com/remoting/frame/reflect"
 	"github.com/remoting/frame/server/auth"
-	"github.com/remoting/frame/util"
 )
 
 type Result struct {
@@ -28,7 +28,7 @@ func (c *Context) ParseJSON() *json.Object {
 	return obj
 }
 func (c *Context) CheckError(exception any) {
-	if !util.IsNil(exception) {
+	if !reflect.IsNil(exception) {
 		panic(exception)
 	}
 }
