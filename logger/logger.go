@@ -41,7 +41,7 @@ func InitConfig(conf Config) io.Writer {
 		MaxBackups: conf.MaxBackups,
 		MaxAge:     28, // days
 	}
-	errorLog = log.New(io.MultiWriter(os.Stdout, errorLogFile), "["+conf.Prefix+"] [ERROR] ", log.Ldate|log.Ltime|log.Lshortfile)
+	errorLog = log.New(io.MultiWriter(os.Stdout, errorLogFile), "["+conf.Prefix+"] [ERROR] ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
 
 	infoLogFile := &lumberjack.Logger{
 		Filename:   conf.LogDir + "info.log",
@@ -50,7 +50,7 @@ func InitConfig(conf Config) io.Writer {
 		MaxAge:     28, // days
 	}
 	writer := io.MultiWriter(os.Stdout, infoLogFile)
-	infoLog = log.New(writer, "["+conf.Prefix+"] [INFO] ", log.Ldate|log.Ltime|log.Lshortfile)
+	infoLog = log.New(writer, "["+conf.Prefix+"] [INFO] ", log.Ldate|log.Lmicroseconds|log.Lshortfile)
 
 	warnLogFile := &lumberjack.Logger{
 		Filename:   conf.LogDir + "warn.log",
@@ -58,7 +58,7 @@ func InitConfig(conf Config) io.Writer {
 		MaxBackups: conf.MaxBackups,
 		MaxAge:     28, // days
 	}
-	warnLog = log.New(io.MultiWriter(os.Stdout, warnLogFile), "["+conf.Prefix+"] [WARN] ", log.Ldate|log.Ltime|log.Llongfile)
+	warnLog = log.New(io.MultiWriter(os.Stdout, warnLogFile), "["+conf.Prefix+"] [WARN] ", log.Ldate|log.Lmicroseconds|log.Llongfile)
 
 	return writer
 }
