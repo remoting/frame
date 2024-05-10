@@ -3,6 +3,7 @@ package goroutine
 import (
 	"fmt"
 	"runtime/debug"
+	"time"
 
 	"github.com/remoting/frame/logger"
 )
@@ -20,4 +21,8 @@ func SafeGo(fn func()) {
 func SafeRun(fn func()) {
 	defer Recover()
 	fn()
+}
+
+func Sleep(millisecond int) {
+	time.Sleep(time.Duration(millisecond) * time.Millisecond)
 }
