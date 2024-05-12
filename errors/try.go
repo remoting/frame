@@ -8,8 +8,6 @@ import (
 func Recover(err *error) {
 	if p := recover(); p != nil {
 		*err = fmt.Errorf("%v", p)
-	} else {
-		*err = nil
 	}
 }
 func TryCatch(tryFunc func() error, catchFunc func(err error)) {
