@@ -64,7 +64,7 @@ func ErrorHandler() gin.HandlerFunc {
 }
 
 // Login 登录操作
-func Login(r http.ResponseWriter, userID string, tokenKey string) (string, errors.RestError) {
+func Login(r http.ResponseWriter, userID string, tokenKey string) (string, error) {
 	token, err := authentication.genToken(userID, tokenKey)
 	if err != nil {
 		return token, errors.NewRestError(10, "Token生成错误")
