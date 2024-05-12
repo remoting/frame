@@ -5,7 +5,7 @@ type RestError struct {
 	Code int
 }
 
-func NewRestError(code int, msg string) error {
+func NewRestError(code int, msg string) RestError {
 	return RestError{
 		error: New(msg),
 		Code:  code,
