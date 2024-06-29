@@ -1,19 +1,21 @@
 package auth
 
-import "github.com/gin-gonic/gin"
+import (
+	"github.com/remoting/frame/server/web"
+)
 
 type DefaultAuthService struct {
 }
 
-func (_ *DefaultAuthService) Authorization(c *gin.Context) bool {
+func (_ *DefaultAuthService) Authorization(c *web.Context) bool {
 	user, exists := c.Get("__userInfo__")
 	if exists {
-		info, ok := user.(UserInfo)
+		info, ok := user.(web.User)
 		if ok {
-			if info.IsAdmin() {
+			if info.IsAdministrator() {
 				return true
 			} else {
-				return true
+				return false
 			}
 		}
 	}

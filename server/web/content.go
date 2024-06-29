@@ -5,7 +5,6 @@ import (
 	"github.com/remoting/frame/pkg/errors"
 	"github.com/remoting/frame/pkg/json"
 	"github.com/remoting/frame/pkg/reflect"
-	"github.com/remoting/frame/server/auth"
 )
 
 type Result struct {
@@ -32,9 +31,9 @@ func (c *Context) CheckError(exception any) {
 		panic(exception)
 	}
 }
-func (c *Context) GetUserInfo() auth.UserInfo {
+func (c *Context) GetUserInfo() User {
 	user, _ := c.Get("__userInfo__")
-	info, ok := user.(auth.UserInfo)
+	info, ok := user.(User)
 	if ok {
 		return info
 	}

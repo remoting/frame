@@ -3,13 +3,39 @@ package auth
 import (
 	"github.com/dgrijalva/jwt-go"
 	"github.com/remoting/frame/pkg/logger"
+	"github.com/remoting/frame/server/web"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
 )
 
+type UserService interface {
+	GetUserById(id string) (web.User, error)
+}
+
+// AuthService  授权服务
+type AuthService interface {
+	Authorization(c *web.Context) bool
+}
+
+// // Authentication 认证服务
+//
+//	type Authentication interface {
+//		GetAuthService() AuthService //授权服务
+//		GetUserService() UserService //用户信息服务
+//		GetTokenSecretPub() string   //jwt Token 验证公钥
+//		GetAnonymousPath() []string  //匿名可访问路径
+//	}
 var tokenName = "jwt-token"
+
+type Authentication struct {
+	AuthService   AuthService //授权服务
+	UserService   UserService //用户信息服务
+	TokenSecret   string      //jwt Token 验证公钥
+	AnonymousPath []string    //匿名可访问路径
+}
+
 var authentication *Authentication
 
 func (auth *Authentication) isAnonymousPath(path string) bool {
@@ -27,7 +53,7 @@ func (auth *Authentication) isAnonymousPath(path string) bool {
 func (auth *Authentication) Auth() gin.HandlerFunc {
 	return func(c *gin.Context) {
 		_token := auth.getTokenByRequest(c)
-		_userInfo := auth.getUserByRequest(c, auth.UserService)
+		_userInfo := auth.getUserByRequest(c)
 		// 将当前用户信息放在 request 对象上，方便后面的控制器获取当前用户
 		c.Set("__userInfo__", _userInfo)
 		c.Set("__token__", _token)
@@ -45,7 +71,10 @@ func (auth *Authentication) Auth() gin.HandlerFunc {
 			}
 		} else {
 			// 已登陆用户判断是否有当前URL的访问权限
-			if auth.AuthService.Authorization(c) {
+			context := &web.Context{
+				Context: c,
+			}
+			if auth.AuthService.Authorization(context) {
 				c.Next()
 			} else {
 				c.JSON(403, map[string]interface{}{
@@ -59,8 +88,8 @@ func (auth *Authentication) Auth() gin.HandlerFunc {
 	}
 }
 
-func (*Authentication) setUserInfoByID(token, userID string, service UserInfoService) UserInfo {
-	userInfo, err := service.GetUserInfoById(userID)
+func (auth *Authentication) setUserInfoByID(token, userID string) web.User {
+	userInfo, err := auth.UserService.GetUserById(userID)
 	if err != nil {
 		logger.Warn(").Error(", err.Error())
 		return nil
@@ -75,7 +104,7 @@ func (*Authentication) setUserInfoByID(token, userID string, service UserInfoSer
 }
 
 func (auth *Authentication) verifyToken(tokenString string) (string, error) {
-	key, err := jwt.ParseRSAPublicKeyFromPEM([]byte(strings.TrimSpace(auth.TokenSecretPub)))
+	key, err := jwt.ParseRSAPublicKeyFromPEM([]byte(strings.TrimSpace(auth.TokenSecret)))
 	if err != nil {
 		return "", err
 	}
@@ -120,7 +149,7 @@ func (*Authentication) getTokenByRequest(r *gin.Context) string {
 }
 
 // GetUserByRequest 获取用户
-func (auth *Authentication) getUserByRequest(r *gin.Context, service UserInfoService) UserInfo {
+func (auth *Authentication) getUserByRequest(r *gin.Context) web.User {
 	token := auth.getTokenByRequest(r)
 	if len(token) <= 0 {
 		return nil
@@ -135,7 +164,7 @@ func (auth *Authentication) getUserByRequest(r *gin.Context, service UserInfoSer
 			return userInfo
 		} else {
 			// 缓存里面没有，去数据库取一下，然后存入缓存
-			return auth.setUserInfoByID(token, userID, service)
+			return auth.setUserInfoByID(token, userID)
 		}
 	} else {
 		r.SetCookie(tokenName, "", -1, "/", "", false, false)

@@ -1,6 +1,7 @@
 package auth
 
 import (
+	"github.com/remoting/frame/server/web"
 	"sync"
 	"time"
 )
@@ -8,7 +9,7 @@ import (
 // UserCache 缓存
 type UserCache struct {
 	LifeCircle int64
-	UserInfo   UserInfo
+	UserInfo   web.User
 	TouchTime  int64
 }
 
@@ -26,7 +27,7 @@ func Del(token string) {
 	defer lock.Unlock()
 	delete(tokenCache, token)
 }
-func Get(token string) UserInfo {
+func Get(token string) web.User {
 	lock.Lock()
 	defer lock.Unlock()
 	cache, ok := tokenCache[token]

@@ -1,7 +1,8 @@
-package web
+package server
 
 import (
 	"github.com/remoting/frame/pkg/errors"
+	"github.com/remoting/frame/server/web"
 	"net/http"
 	"reflect"
 	"strings"
@@ -22,7 +23,7 @@ func (router *RouterGroup) AddRouter(prefix string, controller interface{}) {
 		for i := 0; i < t.NumMethod(); i++ {
 			m := t.Method(i)
 			// 判断是否为控制器方法
-			if m.Type.NumIn() == 2 && m.Type.In(1) == reflect.TypeOf(&Context{}) {
+			if m.Type.NumIn() == 2 && m.Type.In(1) == reflect.TypeOf(&web.Context{}) {
 				if strings.HasPrefix(m.Name, "Get") {
 					routes.GET(m.Name, proxyHandlerFunc(m, controller))
 				} else {
@@ -34,7 +35,7 @@ func (router *RouterGroup) AddRouter(prefix string, controller interface{}) {
 }
 func proxyHandlerFunc(method reflect.Method, object interface{}) gin.HandlerFunc {
 	return func(c *gin.Context) {
-		context := &Context{
+		context := &web.Context{
 			Context: c,
 		}
 		params := []reflect.Value{reflect.ValueOf(object), reflect.ValueOf(context)}
@@ -66,18 +67,18 @@ func proxyHandlerFunc(method reflect.Method, object interface{}) gin.HandlerFunc
 	}
 }
 
-func resultProxyHandlerFunc(result []reflect.Value, context *Context) {
+func resultProxyHandlerFunc(result []reflect.Value, context *web.Context) {
 	// 判断返回值类型
 	obj := result[0].Interface()
 	if obj == nil {
-		context.JSON(http.StatusOK, &Result{
+		context.JSON(http.StatusOK, &web.Result{
 			Code: 0, Message: "", Data: nil,
 		})
 	} else {
-		if reflect.TypeOf(obj) == reflect.TypeOf(&Result{}) || reflect.TypeOf(obj) == reflect.TypeOf(Result{}) {
+		if reflect.TypeOf(obj) == reflect.TypeOf(&web.Result{}) || reflect.TypeOf(obj) == reflect.TypeOf(web.Result{}) {
 			context.JSON(http.StatusOK, obj)
 		} else {
-			context.JSON(http.StatusOK, &Result{
+			context.JSON(http.StatusOK, &web.Result{
 				Code: 0, Message: "", Data: obj,
 			})
 		}
