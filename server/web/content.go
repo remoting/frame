@@ -7,6 +7,8 @@ import (
 	"github.com/remoting/frame/pkg/reflect"
 )
 
+type HandlerFunc func(*Context)
+
 type Result struct {
 	Code    int    `json:"code"`
 	Message string `json:"msg"`

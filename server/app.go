@@ -10,7 +10,6 @@ import (
 	"github.com/gin-gonic/gin"
 )
 
-type HandlerFunc func(*web.Context)
 type Engine struct {
 	*gin.Engine
 }
@@ -38,28 +37,28 @@ func (engine *Engine) Static(prefix string, fs embed.FS) {
 		staticServer.ServeHTTP(c.Writer, c.Request)
 	})
 }
-func (engine *Engine) Any(relativePath string, handlerFunc HandlerFunc) {
+func (engine *Engine) Any(relativePath string, handlerFunc web.HandlerFunc) {
 	engine.Engine.Any(relativePath, func(c *gin.Context) {
 		handlerFunc(&web.Context{
 			Context: c,
 		})
 	})
 }
-func (engine *Engine) GET(relativePath string, handlerFunc HandlerFunc) {
+func (engine *Engine) GET(relativePath string, handlerFunc web.HandlerFunc) {
 	engine.Engine.GET(relativePath, func(c *gin.Context) {
 		handlerFunc(&web.Context{
 			Context: c,
 		})
 	})
 }
-func (engine *Engine) POST(relativePath string, handlerFunc HandlerFunc) {
+func (engine *Engine) POST(relativePath string, handlerFunc web.HandlerFunc) {
 	engine.Engine.POST(relativePath, func(c *gin.Context) {
 		handlerFunc(&web.Context{
 			Context: c,
 		})
 	})
 }
-func (engine *Engine) Api(prefix string, controllers map[string]any) *RouterGroup {
+func (engine *Engine) Api(prefix string, controllers map[string]any) *web.RouterGroup {
 	// API 路由
 	api := engine.Group(prefix)
 	api.GET("/info", func(c *gin.Context) {
@@ -67,7 +66,7 @@ func (engine *Engine) Api(prefix string, controllers map[string]any) *RouterGrou
 			"time": time.Now().Unix(),
 		})
 	})
-	apix := &RouterGroup{
+	apix := &web.RouterGroup{
 		RouterGroup: api,
 	}
 	for prefix, c := range controllers {
@@ -75,19 +74,19 @@ func (engine *Engine) Api(prefix string, controllers map[string]any) *RouterGrou
 	}
 	return apix
 }
-func (engine *Engine) Add(prefix string, controllers map[string]web.Controller) *RouterGroup {
-	// API 路由
+
+func (engine *Engine) Add(prefix string, controllers ...web.Controller) *web.RouterGroup {
+	//// API 路由
 	api := engine.Group(prefix)
-	api.GET("/info", func(c *gin.Context) {
-		c.JSON(http.StatusOK, gin.H{
-			"time": time.Now().Unix(),
-		})
-	})
-	apix := &RouterGroup{
+	apix := &web.RouterGroup{
 		RouterGroup: api,
 	}
-	for prefix, c := range controllers {
-		apix.AddRouter(prefix, c)
+	for _, controller := range controllers {
+		controller.OnInit(func(_prefix string) *web.RouterGroup {
+			return &web.RouterGroup{
+				RouterGroup: apix.Group(_prefix),
+			}
+		})
 	}
 	return apix
 }

@@ -1,7 +1,6 @@
 package auth
 
 import (
-	"github.com/dgrijalva/jwt-go"
 	"github.com/remoting/frame/pkg/logger"
 	"github.com/remoting/frame/server/web"
 	"strings"
@@ -19,14 +18,6 @@ type AuthService interface {
 	Authorization(c *web.Context) bool
 }
 
-// // Authentication 认证服务
-//
-//	type Authentication interface {
-//		GetAuthService() AuthService //授权服务
-//		GetUserService() UserService //用户信息服务
-//		GetTokenSecretPub() string   //jwt Token 验证公钥
-//		GetAnonymousPath() []string  //匿名可访问路径
-//	}
 var tokenName = "jwt-token"
 
 type Authentication struct {
@@ -35,8 +26,6 @@ type Authentication struct {
 	TokenSecret   string      //jwt Token 验证公钥
 	AnonymousPath []string    //匿名可访问路径
 }
-
-var authentication *Authentication
 
 func (auth *Authentication) isAnonymousPath(path string) bool {
 	if path == "/" {
@@ -52,7 +41,7 @@ func (auth *Authentication) isAnonymousPath(path string) bool {
 
 func (auth *Authentication) Auth() gin.HandlerFunc {
 	return func(c *gin.Context) {
-		_token := auth.getTokenByRequest(c)
+		_token := GetTokenByRequest(c)
 		_userInfo := auth.getUserByRequest(c)
 		// 将当前用户信息放在 request 对象上，方便后面的控制器获取当前用户
 		c.Set("__userInfo__", _userInfo)
@@ -103,58 +92,13 @@ func (auth *Authentication) setUserInfoByID(token, userID string) web.User {
 	}
 }
 
-func (auth *Authentication) verifyToken(tokenString string) (string, error) {
-	key, err := jwt.ParseRSAPublicKeyFromPEM([]byte(strings.TrimSpace(auth.TokenSecret)))
-	if err != nil {
-		return "", err
-	}
-	token, err := jwt.Parse(tokenString, func(token *jwt.Token) (interface{}, error) {
-		return key, nil
-	})
-	if err != nil {
-		return "", err
-	}
-	uid, ok := token.Claims.(jwt.MapClaims)["uid"]
-	if ok {
-		return uid.(string), nil
-	}
-	return "", err
-}
-func (*Authentication) genToken(userID string, tokenSecret string) (string, error) {
-	key, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(strings.TrimSpace(tokenSecret)))
-	if err != nil {
-		return "", err
-	}
-	token := jwt.New(jwt.SigningMethodRS256)
-	claims := make(jwt.MapClaims)
-	claims["exp"] = time.Now().Add(time.Hour * time.Duration(24)).Unix()
-	claims["iat"] = time.Now().Unix()
-	claims["uid"] = userID
-	token.Claims = claims
-	return token.SignedString(key)
-}
-
-// GetTokenByRequest 获取用户
-func (*Authentication) getTokenByRequest(r *gin.Context) string {
-	token := ""
-	if len(r.Request.Header.Get(tokenName)) > 0 {
-		token = r.Request.Header.Get(tokenName)
-	} else {
-		cook, err := r.Request.Cookie(tokenName)
-		if err == nil && len(cook.Value) > 0 {
-			token = cook.Value
-		}
-	}
-	return token
-}
-
 // GetUserByRequest 获取用户
 func (auth *Authentication) getUserByRequest(r *gin.Context) web.User {
-	token := auth.getTokenByRequest(r)
+	token := GetTokenByRequest(r)
 	if len(token) <= 0 {
 		return nil
 	}
-	userID, err := auth.verifyToken(token)
+	userID, err := VerifyToken(auth.TokenSecret, token)
 	if err == nil && len(userID) > 0 {
 		// 内存缓存里面有就获取出来返回，如果没有就从数据库获取出来放入缓存
 		userInfo := Get(token)
