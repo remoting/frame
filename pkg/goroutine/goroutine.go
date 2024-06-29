@@ -2,10 +2,9 @@ package goroutine
 
 import (
 	"fmt"
+	"github.com/remoting/frame/pkg/logger"
 	"runtime/debug"
 	"time"
-
-	"github.com/remoting/frame/logger"
 )
 
 func Recover() {

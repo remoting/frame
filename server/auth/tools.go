@@ -3,8 +3,8 @@ package auth
 import (
 	"fmt"
 	"github.com/gin-gonic/gin"
-	"github.com/remoting/frame/errors"
-	"github.com/remoting/frame/logger"
+	"github.com/remoting/frame/pkg/errors"
+	"github.com/remoting/frame/pkg/logger"
 	"net/http"
 	"runtime"
 	"runtime/debug"

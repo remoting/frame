@@ -2,9 +2,9 @@ package web
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/remoting/frame/errors"
-	"github.com/remoting/frame/json"
-	"github.com/remoting/frame/reflect"
+	"github.com/remoting/frame/pkg/errors"
+	"github.com/remoting/frame/pkg/json"
+	"github.com/remoting/frame/pkg/reflect"
 	"github.com/remoting/frame/server/auth"
 )
 

@@ -2,7 +2,7 @@ package auth
 
 import (
 	"github.com/gin-gonic/gin"
-	"github.com/remoting/frame/json"
+	"github.com/remoting/frame/pkg/json"
 )
 
 type Menu struct {

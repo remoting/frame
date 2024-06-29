@@ -1,7 +1,7 @@
 package json
 
 import (
-	"github.com/remoting/frame/util"
+	"github.com/remoting/frame/pkg/conv"
 )
 
 type Object map[string]interface{}
@@ -50,7 +50,7 @@ func (json Object) GetArray(name string) Array {
 func (json Object) GetString(name string) string {
 	value, ok := json[name]
 	if ok {
-		return util.String(value)
+		return conv.String(value)
 	}
 	return ""
 }
@@ -58,7 +58,7 @@ func (json Object) GetInt64(name string) int64 {
 	var t2 int64
 	t1, ok := json[name]
 	if ok {
-		return util.Int64(t1)
+		return conv.Int64(t1)
 	}
 	return t2
 }
@@ -66,7 +66,7 @@ func (json Object) GetFloat32(name string) float32 {
 	var t2 float32
 	t1, ok := json[name]
 	if ok {
-		return util.Float32(t1)
+		return conv.Float32(t1)
 	}
 	return t2
 }
@@ -74,7 +74,7 @@ func (json Object) GetFloat64(name string) float64 {
 	var t2 float64
 	t1, ok := json[name]
 	if ok {
-		return util.Float64(t1)
+		return conv.Float64(t1)
 	}
 	return t2
 }
@@ -86,7 +86,7 @@ func (json Object) GetInt(name string) int {
 	var t2 int
 	t1, ok := json[name]
 	if ok {
-		t2 = util.Int(t1)
+		t2 = conv.Int(t1)
 	}
 	return t2
 }

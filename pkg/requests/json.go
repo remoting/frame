@@ -2,8 +2,7 @@ package requests
 
 import (
 	"encoding/json"
-
-	json2 "github.com/remoting/frame/json"
+	json2 "github.com/remoting/frame/pkg/json"
 )
 
 func ObjToStr(data map[string]any) (string, error) {

@@ -1,4 +1,4 @@
-package util
+package email
 
 import (
 	"gopkg.in/gomail.v2"

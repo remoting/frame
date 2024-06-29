@@ -1,7 +1,7 @@
 package conv
 
 import (
-	"github.com/remoting/frame/util/binary"
+	"github.com/remoting/frame/pkg/binary"
 	"math"
 	"strconv"
 )

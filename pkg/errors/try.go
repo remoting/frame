@@ -2,7 +2,7 @@ package errors
 
 import (
 	"fmt"
-	"github.com/remoting/frame/reflect"
+	"github.com/remoting/frame/pkg/reflect"
 )
 
 func Recover(err *error) {

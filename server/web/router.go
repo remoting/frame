@@ -1,12 +1,12 @@
 package web
 
 import (
+	"github.com/remoting/frame/pkg/errors"
 	"net/http"
 	"reflect"
 	"strings"
 
 	"github.com/gin-gonic/gin"
-	"github.com/remoting/frame/errors"
 )
 
 type RouterGroup struct {

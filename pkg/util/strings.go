@@ -1,6 +1,7 @@
 package util
 
 import (
+	"github.com/remoting/frame/pkg/conv"
 	"strconv"
 	"strings"
 )
@@ -45,7 +46,7 @@ func IsEmpty(s string) bool {
 	}
 }
 func IsEmptyStr(s interface{}) bool {
-	return IsEmpty(String(s))
+	return IsEmpty(conv.String(s))
 }
 
 // 三目运算的函数

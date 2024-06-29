@@ -2,11 +2,11 @@ package auth
 
 import (
 	"github.com/dgrijalva/jwt-go"
+	"github.com/remoting/frame/pkg/logger"
 	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
-	"github.com/remoting/frame/logger"
 )
 
 var tokenName = "jwt-token"

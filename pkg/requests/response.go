@@ -2,9 +2,8 @@ package requests
 
 import (
 	"errors"
+	"github.com/remoting/frame/pkg/json"
 	"strconv"
-
-	"github.com/remoting/frame/json"
 )
 
 func (resp *HttpResponse) GetText() (string, error) {
