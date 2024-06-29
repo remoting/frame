@@ -36,9 +36,6 @@ func (engine *Engine) Static(prefix string, fs embed.FS) {
 		staticServer := http.FileServer(http.FS(fs))
 		staticServer.ServeHTTP(c.Writer, c.Request)
 	})
-	engine.GET("/", func(c *Context) {
-		c.Redirect(301, prefix+"/")
-	})
 }
 func (engine *Engine) Any(relativePath string, handlerFunc HandlerFunc) {
 	engine.Engine.Any(relativePath, func(c *gin.Context) {
