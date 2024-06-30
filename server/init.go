@@ -8,6 +8,7 @@ import (
 	"gorm.io/driver/sqlite"
 	"gorm.io/gorm"
 	"gorm.io/gorm/logger"
+	"gorm.io/plugin/dbresolver"
 )
 
 var db *gorm.DB
@@ -25,12 +26,23 @@ func OnInit(models []any) error {
 }
 func InitDB(models []any) (*gorm.DB, error) {
 	var err error
-	if config.Value.DbType == "sqlite" {
-		db, err = gorm.Open(sqlite.Open(config.Value.DbFile), &gorm.Config{
+	if config.Value.Database.Type == "sqlite" {
+		db, err = gorm.Open(sqlite.Open(config.Value.Database.Master), &gorm.Config{
 			Logger: logger.Default.LogMode(logger.Info),
 		})
-	} else if config.Value.DbType == "mysql" {
-		db, err = gorm.Open(mysql.Open(config.Value.DbFile), &gorm.Config{})
+	} else if config.Value.Database.Type == "mysql" {
+		db, err = gorm.Open(mysql.Open(config.Value.Database.Master), &gorm.Config{})
+		if err == nil {
+			slave := make([]gorm.Dialector, 0)
+			for i := 0; i < len(config.Value.Database.Slave); i++ {
+				slave = append(slave, mysql.Open(config.Value.Database.Slave[i]))
+			}
+			if len(slave) > 0 {
+				db.Use(dbresolver.Register(dbresolver.Config{
+					Replicas: slave,
+				}))
+			}
+		}
 	} else {
 		err = errors.New("dbType error")
 	}

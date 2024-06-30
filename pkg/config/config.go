@@ -12,13 +12,17 @@ var (
 	Value Config
 )
 
+type Database struct {
+	Type   string   `json:"type"`
+	Master string   `json:"master"`
+	Slave  []string `json:"slave"`
+}
 type Config struct {
-	Prefix  string `json:"prefix"`
-	Port    int    `json:"port"`
-	Version string `json:"version"`
-	DbType  string `json:"db-type"`
-	DbFile  string `json:"db-file"`
-	UiDir   string `json:"ui-dir"`
+	Prefix   string   `json:"prefix"`
+	Database Database `json:"database"`
+	Version  string   `json:"version"`
+	UiDir    string   `json:"ui-dir"`
+	Bind     string   `json:"bind"`
 }
 
 func InitOnStart(file string) {
@@ -34,8 +38,8 @@ func InitOnStart(file string) {
 	if Value.Prefix == "" {
 		Value.Prefix = "/"
 	}
-	if Value.Port == 0 {
-		Value.Port = 8086
+	if Value.Bind == "" {
+		Value.Bind = "0.0.0.0:6383"
 	}
 }
 
