@@ -18,13 +18,14 @@ type Role interface {
 type Tenant interface {
 	GetId() string
 	GetName() string
+	GetRoles() []Role
+	IsOwner() bool
 }
 type User interface {
 	GetId() string
 	GetName() string
+	GetEmail() string
 	GetMenus() []Menu
-	GetRoles() []Role
 	GetTenants() []Tenant
 	IsAdministrator() bool
-	IsTenantAdmin() bool
 }

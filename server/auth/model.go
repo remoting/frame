@@ -5,15 +5,55 @@ import "github.com/remoting/frame/server/web"
 type UserImpl struct {
 	Id      string
 	Name    string
+	Email   string
 	Menus   []web.Menu
-	Roles   []web.Role
 	Tenants []web.Tenant
 }
-type TenantImpl struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
-	Logo string `json:"logo"`
+
+func (user *UserImpl) GetId() string {
+	return user.Id
 }
+func (user *UserImpl) GetName() string {
+	return user.Name
+}
+func (user *UserImpl) GetEmail() string {
+	return user.Email
+}
+func (user *UserImpl) GetMenus() []web.Menu {
+	return user.Menus
+}
+func (user *UserImpl) GetTenants() []web.Tenant {
+	return user.Tenants
+}
+func (user *UserImpl) IsAdministrator() bool {
+	return true
+}
+
+type TenantImpl struct {
+	Id    string `json:"id"`
+	Name  string `json:"name"`
+	Logo  string `json:"logo"`
+	Roles []web.Role
+}
+
+func (tenant *TenantImpl) GetId() string {
+	return tenant.Id
+}
+func (tenant *TenantImpl) GetName() string {
+	return tenant.Name
+}
+func (tenant *TenantImpl) GetRoles() []web.Role {
+	return tenant.Roles
+}
+func (tenant *TenantImpl) IsOwner() bool {
+	for _, role := range tenant.Roles {
+		if role.GetId() == "owner" {
+			return true
+		}
+	}
+	return false
+}
+
 type RoleImpl struct {
 	Id   string `json:"id"`
 	Name string `json:"name"`
@@ -38,21 +78,30 @@ type MenuImpl struct {
 	ParentId string     `json:"parentId"`
 }
 
-func (user *UserImpl) GetId() string {
-	return user.Id
+func (menu *MenuImpl) GetId() string {
+	return menu.Id
 }
-func (user *UserImpl) IsAdministrator() bool {
-	if user.Id == "administrator" {
-		return true
-	} else {
-		for _, role := range user.Roles {
-			if role.GetId() == "administrator" {
-				return true
-			}
-		}
-	}
-	return false
+func (menu *MenuImpl) GetLabel() string {
+	return menu.Label
 }
-func (user *UserImpl) IsTenantAdmin() bool {
-	return true
+func (menu *MenuImpl) GetIcon() string {
+	return menu.Icon
+}
+func (menu *MenuImpl) GetPrefix() string {
+	return menu.Prefix
+}
+func (menu *MenuImpl) GetType() string {
+	return menu.Type
+}
+func (menu *MenuImpl) GetRoute() string {
+	return menu.Route
+}
+func (menu *MenuImpl) GetSubRoute() string {
+	return menu.SubRoute
+}
+func (menu *MenuImpl) GetChildren() []web.Menu {
+	return menu.Children
+}
+func (menu *MenuImpl) GetParentId() string {
+	return menu.ParentId
 }
