@@ -8,7 +8,8 @@ import (
 )
 
 type HandlerFunc func(*Context)
-
+type Dict map[string]any
+type List []any
 type Result struct {
 	Code    int    `json:"code"`
 	Message string `json:"msg"`
