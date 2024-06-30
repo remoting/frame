@@ -23,8 +23,8 @@ func (c *Context) BindOBJ(t any) {
 	err := c.BindJSON(t)
 	c.CheckError(err)
 }
-func (c *Context) ParseJSON() *json.Object {
-	obj := &json.Object{}
+func (c *Context) ParseJSON() json.Object {
+	obj := json.Object{}
 	err := c.ShouldBindJSON(obj)
 	c.CheckError(err)
 	return obj

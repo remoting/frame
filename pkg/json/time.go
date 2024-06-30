@@ -14,18 +14,6 @@ type Time struct {
 func NewNow() Time {
 	return Time{Time: time.Now()}
 }
-func NewJsonTime(t time.Time) Time {
-	return Time{
-		Time: t,
-	}
-}
-
-func NowTime() Time {
-	return Time{
-		Time: time.Now(),
-	}
-}
-
 func (j Time) MarshalJSON() ([]byte, error) {
 	var stamp = fmt.Sprintf("\"%s\"", j.Format("2006-01-02 15:04:05"))
 	return []byte(stamp), nil
@@ -37,7 +25,9 @@ func (j *Time) UnmarshalJSON(b []byte) error {
 	if err != nil {
 		return err
 	}
-	*j = NewJsonTime(t)
+	*j = Time{
+		Time: t,
+	}
 	return nil
 }
 

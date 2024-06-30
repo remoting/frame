@@ -20,7 +20,11 @@ func NewUUID() string {
 	ss1 := strconv.FormatUint(binary.BigEndian.Uint64(uuid[:]), 36)
 	return ss + "-" + ss1
 }
-
+func NewCode() string {
+	var uuid [8]byte
+	io.ReadFull(rander, uuid[:])
+	return strconv.FormatUint(binary.BigEndian.Uint64(uuid[:]), 36)
+}
 func GetUUIDTime(str string) (time.Time, error) {
 	idx := strings.Index(str, "-")
 	if idx > 7 {
