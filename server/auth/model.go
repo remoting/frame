@@ -2,6 +2,7 @@ package auth
 
 import "github.com/remoting/frame/server/web"
 
+// UserImpl 用户结构体
 type UserImpl struct {
 	Id            string
 	Name          string
@@ -30,6 +31,7 @@ func (user *UserImpl) IsAdministrator() bool {
 	return user.Administrator
 }
 
+// TenantImpl 租户结构体
 type TenantImpl struct {
 	Id    string `json:"id"`
 	Name  string `json:"name"`
@@ -55,6 +57,7 @@ func (tenant *TenantImpl) IsOwner() bool {
 	return false
 }
 
+// RoleImpl 角色结构图
 type RoleImpl struct {
 	Id   string `json:"id"`
 	Name string `json:"name"`
@@ -67,6 +70,7 @@ func (role *RoleImpl) GetName() string {
 	return role.Name
 }
 
+// MenuImpl 菜单结构体
 type MenuImpl struct {
 	Id       string     `json:"id"`
 	Icon     string     `json:"icon"`
