@@ -3,7 +3,7 @@ package auth
 import (
 	"github.com/remoting/frame/pkg/logger"
 	"github.com/remoting/frame/server/web"
-	"strings"
+	"regexp"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -32,7 +32,8 @@ func (auth *Authentication) isAnonymousPath(path string) bool {
 		return true
 	}
 	for _, v := range auth.AnonymousPath {
-		if strings.HasPrefix(path, v) {
+		isMatch, _ := regexp.MatchString(v, path)
+		if isMatch {
 			return true
 		}
 	}
