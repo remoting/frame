@@ -3,11 +3,12 @@ package auth
 import "github.com/remoting/frame/server/web"
 
 type UserImpl struct {
-	Id      string
-	Name    string
-	Email   string
-	Menus   []web.Menu
-	Tenants []web.Tenant
+	Id            string
+	Name          string
+	Email         string
+	Menus         []web.Menu
+	Tenants       []web.Tenant
+	Administrator bool
 }
 
 func (user *UserImpl) GetId() string {
@@ -26,7 +27,7 @@ func (user *UserImpl) GetTenants() []web.Tenant {
 	return user.Tenants
 }
 func (user *UserImpl) IsAdministrator() bool {
-	return true
+	return user.Administrator
 }
 
 type TenantImpl struct {
