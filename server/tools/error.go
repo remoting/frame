@@ -20,7 +20,7 @@ func ErrorHandler() gin.HandlerFunc {
 				switch _err := r.(type) {
 				case errors.RestError:
 					c.JSON(http.StatusOK, gin.H{
-						"code": _err.Code,
+						"code": _err.Code(),
 						"msg":  _err.Error(),
 						"data": nil,
 					})

@@ -46,7 +46,10 @@ func (c *Context) Fail(code int, message string) {
 	//c.JSON(200, &Result{Code: code, Message: message})
 	panic(errors.NewRestError(code, message))
 }
-
+func (c *Context) Error(err errors.RestError) {
+	c.JSON(200, &Result{Code: err.Code(), Message: err.Error(), Data: nil})
+	c.Abort()
+}
 func (c *Context) Success(data any) {
 	c.JSON(200, &Result{Code: 0, Message: "", Data: data})
 }

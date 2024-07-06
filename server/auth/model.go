@@ -4,13 +4,13 @@ import "github.com/remoting/frame/server/web"
 
 // UserImpl 用户结构体
 type UserImpl struct {
-	Id            string
-	Name          string
-	Email         string
-	Phone         string
-	Menus         []web.Menu
-	Tenants       []web.Tenant
-	Administrator bool
+	Id            string       `json:"id"`
+	Name          string       `json:"name"`
+	Email         string       `json:"email"`
+	Phone         string       `json:"phone"`
+	Menus         []web.Menu   `json:"menus"`
+	Tenants       []web.Tenant `json:"tenants"`
+	Administrator bool         `json:"admin"`
 }
 
 func (user *UserImpl) GetId() string {
