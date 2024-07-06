@@ -81,7 +81,7 @@ func (auth *Authentication) Auth() gin.HandlerFunc {
 func (auth *Authentication) setUserInfoByID(token, userID string) web.User {
 	userInfo, err := auth.UserService.GetUserById(userID)
 	if err != nil {
-		logger.Warn(").Error(", err.Error())
+		logger.Warn("Error,%s", err.Error())
 		return nil
 	} else {
 		Put(token, &UserCache{

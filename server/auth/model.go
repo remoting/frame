@@ -7,6 +7,7 @@ type UserImpl struct {
 	Id            string
 	Name          string
 	Email         string
+	Phone         string
 	Menus         []web.Menu
 	Tenants       []web.Tenant
 	Administrator bool

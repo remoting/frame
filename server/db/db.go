@@ -21,7 +21,9 @@ func InitDB(models []any) (*gorm.DB, error) {
 			Logger: logger.Default.LogMode(logger.Info),
 		})
 	} else if config.Value.Database.Type == "mysql" {
-		__db, err = gorm.Open(mysql.Open(config.Value.Database.Master), &gorm.Config{})
+		__db, err = gorm.Open(mysql.Open(config.Value.Database.Master), &gorm.Config{
+			Logger: logger.Default.LogMode(logger.Info),
+		})
 		if err == nil {
 			slave := make([]gorm.Dialector, 0)
 			for i := 0; i < len(config.Value.Database.Slave); i++ {
@@ -40,9 +42,16 @@ func InitDB(models []any) (*gorm.DB, error) {
 		return nil, errors.Wrap(err, "数据库链接错误")
 	}
 	for _, model := range models {
-		err1 := __db.Set("gorm:table_options", "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci").AutoMigrate(model)
-		if err1 != nil {
-			errors.Wrap(err1, "数据库初始化错误")
+		if config.Value.Database.Type == "mysql" {
+			err1 := __db.Set("gorm:table_options", "ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci").AutoMigrate(model)
+			if err1 != nil {
+				errors.Wrap(err1, "数据库初始化错误")
+			}
+		} else {
+			err1 := __db.AutoMigrate(model)
+			if err1 != nil {
+				errors.Wrap(err1, "数据库初始化错误")
+			}
 		}
 	}
 	return __db, nil
