@@ -11,15 +11,12 @@ type Menu interface {
 	GetChildren() []Menu
 	GetParentId() string
 }
-type Role interface {
-	GetId() string
-	GetName() string
-}
 type Tenant interface {
 	GetId() string
 	GetName() string
-	GetRoles() []Role
+	GetRoles() []string
 	IsOwner() bool
+	IsAdmin() bool
 }
 type User interface {
 	GetId() string
@@ -27,5 +24,6 @@ type User interface {
 	GetEmail() string
 	GetMenus() []Menu
 	GetTenants() []Tenant
+	GetTenantId() string
 	IsAdministrator() bool
 }

@@ -11,6 +11,7 @@ type UserImpl struct {
 	Menus         []web.Menu   `json:"menus"`
 	Tenants       []web.Tenant `json:"tenants"`
 	Administrator bool         `json:"admin"`
+	TenantId      string       `json:"tenantId"`
 }
 
 func (user *UserImpl) GetId() string {
@@ -31,13 +32,16 @@ func (user *UserImpl) GetTenants() []web.Tenant {
 func (user *UserImpl) IsAdministrator() bool {
 	return user.Administrator
 }
+func (user *UserImpl) GetTenantId() string {
+	return user.TenantId
+}
 
 // TenantImpl 租户结构体
 type TenantImpl struct {
-	Id    string `json:"id"`
-	Name  string `json:"name"`
-	Logo  string `json:"logo"`
-	Roles []web.Role
+	Id    string   `json:"id"`
+	Name  string   `json:"name"`
+	Logo  string   `json:"logo"`
+	Roles []string `json:"roles"`
 }
 
 func (tenant *TenantImpl) GetId() string {
@@ -46,29 +50,24 @@ func (tenant *TenantImpl) GetId() string {
 func (tenant *TenantImpl) GetName() string {
 	return tenant.Name
 }
-func (tenant *TenantImpl) GetRoles() []web.Role {
+func (tenant *TenantImpl) GetRoles() []string {
 	return tenant.Roles
 }
 func (tenant *TenantImpl) IsOwner() bool {
 	for _, role := range tenant.Roles {
-		if role.GetId() == "owner" {
+		if role == "owner" {
 			return true
 		}
 	}
 	return false
 }
-
-// RoleImpl 角色结构图
-type RoleImpl struct {
-	Id   string `json:"id"`
-	Name string `json:"name"`
-}
-
-func (role *RoleImpl) GetId() string {
-	return role.Id
-}
-func (role *RoleImpl) GetName() string {
-	return role.Name
+func (tenant *TenantImpl) IsAdmin() bool {
+	for _, role := range tenant.Roles {
+		if role == "admin" {
+			return true
+		}
+	}
+	return false
 }
 
 // MenuImpl 菜单结构体
