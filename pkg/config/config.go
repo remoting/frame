@@ -73,6 +73,7 @@ func getConfig(name string, vars map[string]any) string {
 				return ""
 			}
 		} else {
+			logger.Warn("config format error")
 			return ""
 		}
 	}
@@ -93,7 +94,7 @@ func setConfig(name, val string, vars map[string]any) {
 			if ret, _ok := _vars.(map[string]interface{}); _ok {
 				setConfig(strings.Join(names[1:], "."), val, ret)
 			} else {
-				panic("===config format error===")
+				logger.Error("===config format error===")
 			}
 		} else {
 			x_vars := make(map[string]any, 0)
