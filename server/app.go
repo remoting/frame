@@ -34,6 +34,7 @@ func New() *Engine {
 }
 func (engine *Engine) Run(addr ...string) (err error) {
 	gin.SetMode(gin.ReleaseMode)
+	fmt.Printf("[%s] [DEBUG] Listening and serving HTTP on %s\n", logger.Conf.Prefix, addr)
 	return engine.Engine.Run(addr...)
 }
 func (engine *Engine) Use(middleware ...gin.HandlerFunc) {
