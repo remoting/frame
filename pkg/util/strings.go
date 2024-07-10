@@ -29,6 +29,7 @@ func Split(s string) []string {
 		return false
 	})
 }
+
 func String2Int(strArr []string) []int {
 	res := make([]int, len(strArr))
 

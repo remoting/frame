@@ -2,14 +2,16 @@ package config
 
 import (
 	"encoding/json"
+	"github.com/remoting/frame/pkg/conv"
 	"os"
+	"strings"
 	"sync"
 
 	"github.com/remoting/frame/pkg/logger"
 )
 
 var (
-	Value Config
+	Value *_config
 )
 
 type Database struct {
@@ -17,16 +19,17 @@ type Database struct {
 	Master string   `json:"master"`
 	Slave  []string `json:"slave"`
 }
-type Config struct {
-	Prefix   string   `json:"prefix"`
-	Database Database `json:"database"`
-	Version  string   `json:"version"`
-	UiDir    string   `json:"ui-dir"`
-	Bind     string   `json:"bind"`
+type _config struct {
+	Prefix   string         `json:"prefix"`
+	Database Database       `json:"database"`
+	Version  string         `json:"version"`
+	UiDir    string         `json:"ui-dir"`
+	Bind     string         `json:"bind"`
+	Custom   map[string]any `json:"custom"`
 }
 
 func InitOnStart(file string) {
-	Value = Config{}
+	Value = &_config{}
 	configBytes, err := os.ReadFile(file)
 	if err != nil {
 		logger.Warn("file not found=%s", file)
@@ -47,20 +50,55 @@ func InitOnStart(file string) {
 // 以下内容是保存数据库中的配置项
 ////
 
-var setting = make(map[string]string)
 var lock = sync.RWMutex{}
 
 func GetConfig(name string) string {
 	lock.RLock()
 	defer lock.RUnlock()
-	val, ok := setting[name]
-	if ok {
-		return val
+	return getConfig(name, Value.Custom)
+}
+func getConfig(name string, vars map[string]any) string {
+	names := strings.Split(name, ".")
+	if len(names) <= 1 {
+		val, ok := vars[names[0]]
+		if ok {
+			return conv.String(val)
+		}
+	} else {
+		val, ok := vars[names[0]]
+		if ok {
+			if ret, _ok := val.(map[string]interface{}); _ok {
+				return getConfig(strings.Join(names[1:], "."), ret)
+			} else {
+				return ""
+			}
+		} else {
+			return ""
+		}
 	}
 	return ""
 }
 func PutConfig(name, val string) {
 	lock.Lock()
 	defer lock.Unlock()
-	setting[name] = val
+	setConfig(name, val, Value.Custom)
+}
+func setConfig(name, val string, vars map[string]any) {
+	names := strings.Split(name, ".")
+	if len(names) <= 1 {
+		vars[name] = val
+	} else {
+		_vars, ok := vars[names[0]]
+		if ok {
+			if ret, _ok := _vars.(map[string]interface{}); _ok {
+				setConfig(strings.Join(names[1:], "."), val, ret)
+			} else {
+				panic("===config format error===")
+			}
+		} else {
+			x_vars := make(map[string]any, 0)
+			vars[names[0]] = x_vars
+			setConfig(strings.Join(names[1:], "."), val, x_vars)
+		}
+	}
 }
