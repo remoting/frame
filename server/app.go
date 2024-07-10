@@ -17,12 +17,12 @@ type Engine struct {
 }
 
 func New() *Engine {
-	gin.SetMode("release")
+	gin.SetMode(gin.ReleaseMode)
 	gin.DebugPrintRouteFunc = func(httpMethod, absolutePath, handlerName string, nuHandlers int) {
 		fmt.Printf("[%s] [DEBUG] %-6s %-25s --> %s (%d handlers)\n", logger.Conf.Prefix, httpMethod, absolutePath, handlerName, nuHandlers)
 	}
 	r := gin.New()
-	gin.SetMode("debug")
+	gin.SetMode(gin.DebugMode)
 	r.Use(tools.Logger())
 	r.Use(tools.ErrorHandler())
 	r.Use(tools.CORSMiddleware())
@@ -33,7 +33,7 @@ func New() *Engine {
 	}
 }
 func (engine *Engine) Run(addr ...string) (err error) {
-	gin.SetMode("release")
+	gin.SetMode(gin.ReleaseMode)
 	return engine.Engine.Run(addr...)
 }
 func (engine *Engine) Use(middleware ...gin.HandlerFunc) {
