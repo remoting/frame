@@ -7,6 +7,7 @@ import (
 	"github.com/remoting/frame/server/tools"
 	"github.com/remoting/frame/server/web"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gin-gonic/gin"
@@ -43,10 +44,32 @@ func (engine *Engine) Use(middleware ...gin.HandlerFunc) {
 func (engine *Engine) SetMode(mode string) {
 	gin.SetMode(mode)
 }
-func (engine *Engine) Static(prefix string, fs embed.FS) {
+
+//func (engine *Engine) StaticSpa(prefix string, fs embed.FS) {
+//	engine.Engine.Static()
+//}
+
+func (engine *Engine) Static(prefix string, fs embed.FS, uidir string) {
+	var fileSystem http.FileSystem
+	var isDir bool
+	if uidir == "" {
+		isDir = false
+		fileSystem = http.FS(fs)
+	} else {
+		isDir = true
+		fileSystem = http.Dir(uidir)
+	}
 	engine.Any(prefix+"/*filepath", func(c *web.Context) {
-		staticServer := http.FileServer(http.FS(fs))
-		staticServer.ServeHTTP(c.Writer, c.Request)
+		filepath := c.Request.URL.Path
+		if isDir {
+			filepath = strings.TrimPrefix(filepath, prefix)
+		}
+		file, err := tools.ServeFile(fileSystem, filepath, prefix+"/index.html")
+		if err != nil {
+			c.AbortWithError(400, err)
+			return
+		}
+		http.ServeFileFS(c.Writer, c.Request, fs, file)
 	})
 }
 func (engine *Engine) Any(relativePath string, handlerFunc web.HandlerFunc) {
