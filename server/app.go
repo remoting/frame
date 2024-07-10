@@ -15,7 +15,7 @@ type Engine struct {
 }
 
 func New() *Engine {
-	r := gin.Default()
+	r := gin.New()
 	r.Use(tools.ErrorHandler())
 	r.Use(tools.CORSMiddleware())
 	//r.Use(auth.Auth())

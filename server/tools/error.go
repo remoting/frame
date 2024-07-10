@@ -7,7 +7,6 @@ import (
 	"github.com/remoting/frame/pkg/logger"
 	"net/http"
 	"runtime"
-	"runtime/debug"
 )
 
 func ErrorHandler() gin.HandlerFunc {
@@ -16,7 +15,7 @@ func ErrorHandler() gin.HandlerFunc {
 			if r := recover(); r != nil {
 				//打印错误堆栈信息
 				errMsg := fmt.Sprintf("%+v", r)
-				logger.Error("%s\n%s", errMsg, string(debug.Stack()))
+				logger.ErrorSkip("%s\n", 12, errMsg)
 				switch _err := r.(type) {
 				case errors.RestError:
 					c.JSON(http.StatusOK, gin.H{

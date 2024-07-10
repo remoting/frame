@@ -67,14 +67,23 @@ func InitConfig(conf Config) io.Writer {
 
 	return writer
 }
-
+func ErrorSkip(format string, skip int, v ...interface{}) {
+	if _level == -999 {
+		fmt.Printf("Log Uninitialized:"+format, v...)
+	} else {
+		if _level <= 15 {
+			errorLog.Output(2, fmt.Sprintf(format, v...))
+			errorLog.Output(2, fmt.Sprintf("%s", Stack(skip)))
+		}
+	}
+}
 func Error(format string, v ...interface{}) {
 	if _level == -999 {
 		fmt.Printf("Log Uninitialized:"+format, v...)
 	} else {
 		if _level <= 15 {
 			errorLog.Output(2, fmt.Sprintf(format, v...))
-			errorLog.Output(2, fmt.Sprintf("%s", Stack()))
+			errorLog.Output(2, fmt.Sprintf("%s", Stack(5)))
 		}
 	}
 }
@@ -97,7 +106,7 @@ func Warn(format string, v ...interface{}) {
 	}
 }
 
-func Stack() []byte {
+func Stack(skip int) []byte {
 	buf := make([]byte, 1024)
 	for {
 		n := runtime.Stack(buf, false)
@@ -109,6 +118,6 @@ func Stack() []byte {
 	}
 	line := []byte("\n")
 	data := bytes.Split(buf, line)
-	data = append(data[:1], data[5:]...)
+	data = append(data[:1], data[skip:]...)
 	return bytes.Join(data, line)
 }
