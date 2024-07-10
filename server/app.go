@@ -2,6 +2,8 @@ package server
 
 import (
 	"embed"
+	"fmt"
+	"github.com/remoting/frame/pkg/logger"
 	"github.com/remoting/frame/server/tools"
 	"github.com/remoting/frame/server/web"
 	"net/http"
@@ -15,7 +17,13 @@ type Engine struct {
 }
 
 func New() *Engine {
+	gin.SetMode("release")
+	gin.DebugPrintRouteFunc = func(httpMethod, absolutePath, handlerName string, nuHandlers int) {
+		fmt.Printf("[%s] [DEBUG] %-6s %-25s --> %s (%d handlers)\n", logger.Conf.Prefix, httpMethod, absolutePath, handlerName, nuHandlers)
+	}
 	r := gin.New()
+	gin.SetMode("debug")
+	r.Use(tools.Logger())
 	r.Use(tools.ErrorHandler())
 	r.Use(tools.CORSMiddleware())
 	//r.Use(auth.Auth())
@@ -24,7 +32,10 @@ func New() *Engine {
 		Engine: r,
 	}
 }
-
+func (engine *Engine) Run(addr ...string) (err error) {
+	gin.SetMode("release")
+	return engine.Engine.Run(addr...)
+}
 func (engine *Engine) Use(middleware ...gin.HandlerFunc) {
 	engine.Engine.Use(middleware...)
 }
