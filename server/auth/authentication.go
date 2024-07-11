@@ -41,6 +41,9 @@ func (auth *Authentication) isAnonymousPath(path string) bool {
 }
 
 func (auth *Authentication) Auth() gin.HandlerFunc {
+	if auth.AuthService == nil {
+		auth.AuthService = &DefaultAuthService{}
+	}
 	return func(c *gin.Context) {
 		_token := GetTokenByRequest(c)
 		_userInfo := auth.getUserByRequest(c)

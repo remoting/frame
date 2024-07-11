@@ -20,6 +20,7 @@ type Database struct {
 	Slave  []string `json:"slave"`
 }
 type _config struct {
+	File     string         `json:"-"`
 	Prefix   string         `json:"prefix"`
 	Database Database       `json:"database"`
 	Version  string         `json:"version"`
@@ -29,7 +30,9 @@ type _config struct {
 }
 
 func InitOnStart(file string) {
-	Value = &_config{}
+	Value = &_config{
+		File: file,
+	}
 	configBytes, err := os.ReadFile(file)
 	if err != nil {
 		logger.Warn("file not found=%s", file)
@@ -78,6 +81,15 @@ func getConfig(name string, vars map[string]any) string {
 		}
 	}
 	return ""
+}
+func Save() error {
+	lock.Lock()
+	defer lock.Unlock()
+	jsonStr, err := json.MarshalIndent(Value, "", "    ")
+	if err != nil {
+		return err
+	}
+	return os.WriteFile(Value.File, jsonStr, 0644)
 }
 func PutConfig(name, val string) {
 	lock.Lock()
