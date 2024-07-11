@@ -21,10 +21,10 @@ type Database struct {
 }
 type _config struct {
 	File     string         `json:"-"`
-	Prefix   string         `json:"prefix"`
-	Database Database       `json:"database"`
+	Prefix   string         `json:"prefix,omitempty"`
+	Database *Database      `json:"database,omitempty"`
 	Version  string         `json:"version"`
-	UiDir    string         `json:"ui-dir"`
+	UiDir    string         `json:"ui-dir,omitempty"`
 	Bind     string         `json:"bind"`
 	Custom   map[string]any `json:"custom"`
 }
@@ -85,6 +85,12 @@ func getConfig(name string, vars map[string]any) string {
 func Save() error {
 	lock.Lock()
 	defer lock.Unlock()
+	if Value.Prefix == "/" {
+		Value.Prefix = ""
+		defer func() {
+			Value.Prefix = "/"
+		}()
+	}
 	jsonStr, err := json.MarshalIndent(Value, "", "    ")
 	if err != nil {
 		return err
