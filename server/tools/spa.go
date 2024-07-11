@@ -7,7 +7,7 @@ import (
 	"strings"
 )
 
-func ServeFile(fileSystem http.FileSystem, filepath, index string) (string, error) {
+func ServeFile(fileSystem http.FileSystem, filepath, index string) (string, http.File, error) {
 	f, err := fileSystem.Open(filepath)
 	if err != nil {
 		//有错误
@@ -15,11 +15,11 @@ func ServeFile(fileSystem http.FileSystem, filepath, index string) (string, erro
 			filepath = index
 			f, err = fileSystem.Open(index)
 		} else {
-			return "", err
+			return "", nil, err
 		}
 	}
 	if err != nil {
-		return "", err
+		return "", nil, err
 	}
 	d, err := f.Stat()
 	if d.IsDir() {
@@ -29,6 +29,6 @@ func ServeFile(fileSystem http.FileSystem, filepath, index string) (string, erro
 		filepath = filepath + "index.html"
 		return ServeFile(fileSystem, filepath, index)
 	} else {
-		return filepath, nil
+		return filepath, f, nil
 	}
 }

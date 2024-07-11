@@ -45,31 +45,36 @@ func (engine *Engine) SetMode(mode string) {
 	gin.SetMode(mode)
 }
 
-//func (engine *Engine) StaticSpa(prefix string, fs embed.FS) {
-//	engine.Engine.Static()
-//}
-
-func (engine *Engine) Static(prefix string, fs embed.FS, uidir string) {
-	var fileSystem http.FileSystem
-	var isDir bool
-	if uidir == "" {
-		isDir = false
-		fileSystem = http.FS(fs)
-	} else {
-		isDir = true
-		fileSystem = http.Dir(uidir)
+func (engine *Engine) StaticFS(urlPrefix, fsPrefix string, fs embed.FS) {
+	if strings.HasSuffix(fsPrefix, "/") {
+		fsPrefix = strings.TrimPrefix(fsPrefix, "/")
 	}
-	engine.Any(prefix+"/*filepath", func(c *web.Context) {
-		filepath := c.Request.URL.Path
-		if isDir {
-			filepath = strings.TrimPrefix(filepath, prefix)
+	fileSystem := http.FS(fs)
+	engine.Any(urlPrefix+"/*filepath", func(c *web.Context) {
+		filepath := strings.TrimPrefix(c.Request.URL.Path, urlPrefix)
+		if !strings.HasPrefix(filepath, "/") {
+			filepath = "/" + filepath
 		}
-		file, err := tools.ServeFile(fileSystem, filepath, prefix+"/index.html")
+		filepath = fsPrefix + filepath
+		fileName, _, err := tools.ServeFile(fileSystem, filepath, fsPrefix+"/index.html")
 		if err != nil {
 			c.AbortWithError(400, err)
 			return
 		}
-		http.ServeFileFS(c.Writer, c.Request, fs, file)
+		http.ServeFileFS(c.Writer, c.Request, fs, fileName)
+	})
+}
+func (engine *Engine) StaticDir(urlPrefix, uiDir string) {
+	fileSystem := http.Dir(uiDir)
+	engine.Any(urlPrefix+"/*filepath", func(c *web.Context) {
+		filepath := strings.TrimPrefix(c.Request.URL.Path, urlPrefix)
+		_, file, err := tools.ServeFile(fileSystem, filepath, "/index.html")
+		if err != nil {
+			c.AbortWithError(400, err)
+			return
+		}
+		info, _ := file.Stat()
+		http.ServeContent(c.Writer, c.Request, info.Name(), info.ModTime(), file)
 	})
 }
 func (engine *Engine) Any(relativePath string, handlerFunc web.HandlerFunc) {
