@@ -28,7 +28,13 @@ func (*OSExecutor) OsExec(cmd string) *Result {
 		Err:  err,
 	}
 }
-
+func (*OSExecutor) OsRun(cmd string) error {
+	env := os.Environ()
+	command := exec.Command("bash", "-c", cmd)
+	command.Env = env
+	_, err := command.CombinedOutput()
+	return err
+}
 func (*OSExecutor) Command(name string, args ...string) *exec.Cmd {
 	return exec.Command(name, args...)
 }

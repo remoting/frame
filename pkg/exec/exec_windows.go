@@ -38,6 +38,10 @@ func (*OSExecutor) OsExec(cmd string) *Result {
 		Err:  err,
 	}
 }
+func (*OSExecutor) OsRun(cmd string) error {
+
+	return nil
+}
 func (*OSExecutor) Command(name string, args ...string) *exec.Cmd {
 	cmd := exec.Command(name, args...)
 	cmd.SysProcAttr = &syscall.SysProcAttr{HideWindow: true}
