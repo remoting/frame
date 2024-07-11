@@ -21,7 +21,22 @@ func SafeRun(fn func()) {
 	defer Recover()
 	fn()
 }
-
+func SafeRetry(fn func()) {
+	go retryRun(fn)
+}
+func retryRun(fn func()) {
+	for {
+		func() {
+			defer func() {
+				if r := recover(); r != nil {
+					logger.Error("Recovered from panic: %v. Retrying in 0.5 seconds...\n", r)
+					time.Sleep(500 * time.Millisecond)
+				}
+			}()
+			fn()
+		}()
+	}
+}
 func Sleep(millisecond int) {
 	time.Sleep(time.Duration(millisecond) * time.Millisecond)
 }
