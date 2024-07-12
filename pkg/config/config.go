@@ -41,9 +41,6 @@ func InitOnStart(file string) {
 	if err != nil {
 		logger.Error("error:%v", err)
 	}
-	if Value.Prefix == "" {
-		Value.Prefix = "/"
-	}
 	if Value.Bind == "" {
 		Value.Bind = "0.0.0.0:6383"
 	}
@@ -85,12 +82,6 @@ func getConfig(name string, vars map[string]any) string {
 func Save() error {
 	lock.Lock()
 	defer lock.Unlock()
-	if Value.Prefix == "/" {
-		Value.Prefix = ""
-		defer func() {
-			Value.Prefix = "/"
-		}()
-	}
 	jsonStr, err := json.MarshalIndent(Value, "", "    ")
 	if err != nil {
 		return err
@@ -100,6 +91,9 @@ func Save() error {
 func PutConfig(name, val string) {
 	lock.Lock()
 	defer lock.Unlock()
+	if Value.Custom == nil {
+		Value.Custom = make(map[string]any, 0)
+	}
 	setConfig(name, val, Value.Custom)
 }
 func setConfig(name, val string, vars map[string]any) {
