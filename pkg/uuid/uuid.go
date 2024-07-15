@@ -20,6 +20,10 @@ func NewUUID() string {
 	ss1 := strconv.FormatUint(binary.BigEndian.Uint64(uuid[:]), 36)
 	return ss + "-" + ss1
 }
+
+func NUUID() string {
+	return strings.ReplaceAll(NewUUID(),"-","")
+}
 func NewCode() string {
 	var uuid [8]byte
 	io.ReadFull(rander, uuid[:])
