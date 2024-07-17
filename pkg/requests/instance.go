@@ -1,5 +1,7 @@
 package requests
 
+import "context"
+
 var _httpclient = NewHttpClient(30)
 
 func ConfigHttpClient(_client *HttpClient) {
@@ -7,20 +9,20 @@ func ConfigHttpClient(_client *HttpClient) {
 }
 
 func Get(url string, params, header map[string]string) (*HttpResponse, error) {
-	return _httpclient.Get(url, params, header)
+	return _httpclient.Get(context.Background(), url, params, header)
 }
 func PostFormData(url string, params, header map[string]string) (*HttpResponse, error) {
-	return _httpclient.PostFormData(url, params, header)
+	return _httpclient.PostFormData(context.Background(), url, params, header)
 }
 func PostUrlData(url string, params, header map[string]string) (*HttpResponse, error) {
-	return _httpclient.PostUrlData(url, params, header)
+	return _httpclient.PostUrlData(context.Background(), url, params, header)
 }
 func PostJson(url string, data map[string]any, header map[string]string) (*HttpResponse, error) {
-	return _httpclient.PostJson(url, data, header)
+	return _httpclient.PostJson(context.Background(), url, data, header)
 }
 func PostFile(url string, files []*FormFile, params, header map[string]string) (*HttpResponse, error) {
-	return _httpclient.PostFile(url, files, params, header)
+	return _httpclient.PostFile(context.Background(), url, files, params, header)
 }
 func PostFileBody(url string, filePath string, header map[string]string) (*HttpResponse, error) {
-	return _httpclient.PostFileBody(url, filePath, header)
+	return _httpclient.PostFileBody(context.Background(), url, filePath, header)
 }

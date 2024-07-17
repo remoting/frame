@@ -2,6 +2,7 @@ package requests
 
 import (
 	"bytes"
+	"context"
 	"io"
 	"mime/multipart"
 	"net"
@@ -63,8 +64,8 @@ func (cli *HttpClient) getClient() *http.Client {
 	return cli.client
 }
 
-func (cli *HttpClient) DoHttpRequest(method, url string, header map[string]string, _body io.Reader) (*http.Response, error) {
-	req, err := http.NewRequest(method, url, _body)
+func (cli *HttpClient) DoHttpRequest(ctx context.Context, method, url string, header map[string]string, _body io.Reader) (*http.Response, error) {
+	req, err := http.NewRequestWithContext(ctx, method, url, _body)
 	if err != nil {
 		return nil, err
 	}
@@ -77,8 +78,8 @@ func (cli *HttpClient) DoHttpRequest(method, url string, header map[string]strin
 	}
 	return resp, nil
 }
-func (cli *HttpClient) httpRequest(method, url string, header map[string]string, _body io.Reader) (*HttpResponse, error) {
-	resp, err := cli.DoHttpRequest(method, url, header, _body)
+func (cli *HttpClient) httpRequest(ctx context.Context, method, url string, header map[string]string, _body io.Reader) (*HttpResponse, error) {
+	resp, err := cli.DoHttpRequest(ctx, method, url, header, _body)
 	if err != nil {
 		return nil, err
 	}
@@ -97,15 +98,15 @@ func (cli *HttpClient) httpRequest(method, url string, header map[string]string,
 	return _resp, nil
 }
 
-func (cli *HttpClient) Get(url string, params, header map[string]string) (*HttpResponse, error) {
+func (cli *HttpClient) Get(ctx context.Context, url string, params, header map[string]string) (*HttpResponse, error) {
 	_header := cli.initHeader(header)
 	_, ok := _header["Content-Type"]
 	if !ok {
 		_header["Content-Type"] = "application/json"
 	}
-	return cli.httpRequest("GET", cli.getUrlParams(url, params), _header, nil)
+	return cli.httpRequest(ctx, "GET", cli.getUrlParams(url, params), _header, nil)
 }
-func (cli *HttpClient) PostFormData(url string, params, header map[string]string) (*HttpResponse, error) {
+func (cli *HttpClient) PostFormData(ctx context.Context, url string, params, header map[string]string) (*HttpResponse, error) {
 	_header := cli.initHeader(header)
 	body := &bytes.Buffer{}
 	writer := multipart.NewWriter(body)
@@ -117,17 +118,17 @@ func (cli *HttpClient) PostFormData(url string, params, header map[string]string
 	if !ok {
 		_header["Content-Type"] = writer.FormDataContentType()
 	}
-	return cli.httpRequest("POST", url, _header, body)
+	return cli.httpRequest(ctx, "POST", url, _header, body)
 }
-func (cli *HttpClient) PostUrlData(url string, params, header map[string]string) (*HttpResponse, error) {
+func (cli *HttpClient) PostUrlData(ctx context.Context, url string, params, header map[string]string) (*HttpResponse, error) {
 	_header := cli.initHeader(header)
 	_, ok := _header["Content-Type"]
 	if !ok {
 		_header["Content-Type"] = "application/x-www-form-urlencoded"
 	}
-	return cli.httpRequest("POST", url, _header, strings.NewReader(cli.getParamString(params)))
+	return cli.httpRequest(ctx, "POST", url, _header, strings.NewReader(cli.getParamString(params)))
 }
-func (cli *HttpClient) PostJson(url string, data map[string]any, header map[string]string) (*HttpResponse, error) {
+func (cli *HttpClient) PostJson(ctx context.Context, url string, data map[string]any, header map[string]string) (*HttpResponse, error) {
 	_header := cli.initHeader(header)
 	_, ok := _header["Content-Type"]
 	if !ok {
@@ -137,9 +138,9 @@ func (cli *HttpClient) PostJson(url string, data map[string]any, header map[stri
 	if err != nil {
 		return nil, err
 	}
-	return cli.httpRequest("POST", url, _header, strings.NewReader(_body))
+	return cli.httpRequest(ctx, "POST", url, _header, strings.NewReader(_body))
 }
-func (cli *HttpClient) PostFile(url string, files []*FormFile, params, header map[string]string) (*HttpResponse, error) {
+func (cli *HttpClient) PostFile(ctx context.Context, url string, files []*FormFile, params, header map[string]string) (*HttpResponse, error) {
 	_header := cli.initHeader(header)
 	bodyBuf := &bytes.Buffer{}
 	bodyWriter := multipart.NewWriter(bodyBuf)
@@ -171,9 +172,9 @@ func (cli *HttpClient) PostFile(url string, files []*FormFile, params, header ma
 	if !ok {
 		_header["Content-Type"] = bodyWriter.FormDataContentType()
 	}
-	return cli.httpRequest("POST", url, _header, bodyBuf)
+	return cli.httpRequest(ctx, "POST", url, _header, bodyBuf)
 }
-func (cli *HttpClient) PostFileBody(url string, filePath string, header map[string]string) (*HttpResponse, error) {
+func (cli *HttpClient) PostFileBody(ctx context.Context, url string, filePath string, header map[string]string) (*HttpResponse, error) {
 	bodyBuf := &bytes.Buffer{}
 	data, err := os.ReadFile(filePath)
 	if err != nil {
@@ -183,7 +184,7 @@ func (cli *HttpClient) PostFileBody(url string, filePath string, header map[stri
 	if err != nil {
 		return nil, err
 	}
-	return cli.httpRequest("POST", url, header, bodyBuf)
+	return cli.httpRequest(ctx, "POST", url, header, bodyBuf)
 }
 
 // getParamString

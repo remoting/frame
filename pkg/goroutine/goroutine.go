@@ -27,14 +27,14 @@ func SafeRun(fn func()) {
 	defer Recover()
 	fn()
 }
-func SafeRetry(fn func()) {
-	go retryRun(fn)
+func SafeRetry(fn func(), isRun func() bool) {
+	go retryRun(fn, isRun)
 }
-func retryRun(fn func()) {
-	for {
+func retryRun(fn func(), isRun func() bool) {
+	for isRun() {
 		func() {
 			defer Recover(func(err error) {
-				logger.Error("Recovered from panic: %v. Retrying in 0.5 seconds...\n", err)
+				logger.Error("Recovered from panic: %s. Retrying in 0.5 seconds...\n", err.Error())
 				time.Sleep(500 * time.Millisecond)
 			})
 			fn()
