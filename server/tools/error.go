@@ -6,6 +6,7 @@ import (
 	"github.com/remoting/frame/pkg/errors"
 	"github.com/remoting/frame/pkg/logger"
 	"net/http"
+	"reflect"
 	"runtime"
 )
 
@@ -14,8 +15,12 @@ func ErrorHandler() gin.HandlerFunc {
 		defer func() {
 			if r := recover(); r != nil {
 				//打印错误堆栈信息
-				errMsg := fmt.Sprintf("%+v", r)
-				logger.ErrorSkip("%s\n", 12, errMsg)
+				if reflect.TypeOf(r).String() == "*errors.fundamental" {
+					// 错误里面包含了堆栈
+					logger.ErrorSkip("%+v\n", r)
+				} else {
+					logger.Error("%s\n", fmt.Sprintf("%+v", r))
+				}
 				switch _err := r.(type) {
 				case errors.RestError:
 					c.JSON(http.StatusOK, gin.H{
@@ -38,7 +43,7 @@ func ErrorHandler() gin.HandlerFunc {
 				default:
 					c.JSON(http.StatusOK, gin.H{
 						"code": "500",
-						"msg":  errMsg,
+						"msg":  "unknown",
 						"data": nil,
 					})
 				}

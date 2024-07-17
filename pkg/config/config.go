@@ -91,6 +91,11 @@ func Save() error {
 func PutConfig(name, val string) {
 	lock.Lock()
 	defer lock.Unlock()
+	if Value == nil {
+		Value = &_config{
+			File: "./config.json",
+		}
+	}
 	if Value.Custom == nil {
 		Value.Custom = make(map[string]any, 0)
 	}
