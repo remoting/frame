@@ -4,6 +4,7 @@ import (
 	"bytes"
 	"io"
 	"mime/multipart"
+	"net"
 	"net/http"
 	"net/url"
 	"os"
@@ -20,17 +21,46 @@ func NewHttpClient(params ...any) *HttpClient {
 			if _ok {
 				timeout = _timeout
 			}
+		} else {
+			_timeout, ok1 := params[0].(int)
+			if ok1 {
+				timeout = _timeout
+			}
 		}
 	}
 	return &HttpClient{
-		Timeout: timeout,
+		client: &http.Client{
+			Timeout: time.Duration(timeout) * time.Second,
+		},
 	}
 }
-
-func (cli *HttpClient) GetClient() *http.Client {
-	return &http.Client{
-		Timeout: time.Duration(cli.Timeout) * time.Second,
+func NewCustomClient(_client *http.Client) *HttpClient {
+	return &HttpClient{
+		client: _client,
 	}
+}
+func NewDisableClient(timeout int) *HttpClient {
+	return &HttpClient{
+		client: &http.Client{
+			Timeout: time.Duration(timeout) * time.Second,
+			Transport: &http.Transport{
+				// 禁用连接池
+				DisableKeepAlives: true,
+				// 确保没有空闲连接
+				MaxIdleConnsPerHost: 0,
+				// 设置连接超时
+				DialContext: (&net.Dialer{
+					Timeout:   5 * time.Second,
+					KeepAlive: 0,
+				}).DialContext,
+				// 设置TLS连接超时
+				TLSHandshakeTimeout: 5 * time.Second,
+			},
+		},
+	}
+}
+func (cli *HttpClient) getClient() *http.Client {
+	return cli.client
 }
 
 func (cli *HttpClient) DoHttpRequest(method, url string, header map[string]string, _body io.Reader) (*http.Response, error) {
@@ -41,7 +71,7 @@ func (cli *HttpClient) DoHttpRequest(method, url string, header map[string]strin
 	for k, v := range header {
 		req.Header.Set(k, v)
 	}
-	resp, err := cli.GetClient().Do(req)
+	resp, err := cli.getClient().Do(req)
 	if err != nil {
 		return nil, err
 	}

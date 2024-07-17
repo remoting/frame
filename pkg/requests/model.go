@@ -1,5 +1,7 @@
 package requests
 
+import "net/http"
+
 type HttpResponse struct {
 	Data   []byte
 	Status int
@@ -10,5 +12,5 @@ type FormFile struct {
 	FilePath string
 }
 type HttpClient struct {
-	Timeout int
+	client *http.Client
 }
