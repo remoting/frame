@@ -17,6 +17,8 @@ func (*OSExecutor) OsExec(cmd string) *Result {
 	command.Stdout = &stdoutBuf
 	command.Stderr = &stderrBuf
 	result.Error = command.Run()
+	result.Output = stdoutBuf.Bytes()
+	result.ErrMsg = stderrBuf.Bytes()
 	return result
 }
 
