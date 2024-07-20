@@ -19,13 +19,13 @@ func Recover(fn ...func(err error)) {
 	}
 }
 
-func SafeGo(fn func()) {
-	go SafeRun(fn)
+func SafeGo(fn func(...any), args ...any) {
+	go SafeRun(fn, args...)
 }
 
-func SafeRun(fn func()) {
+func SafeRun(fn func(...any), args ...any) {
 	defer Recover()
-	fn()
+	fn(args...)
 }
 func SafeRetry(fn func(), isRun func() bool) {
 	go retryRun(fn, isRun)

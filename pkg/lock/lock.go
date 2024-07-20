@@ -19,5 +19,8 @@ func (m *KeyLock) Lock(key string) func() {
 	mtx := value.(*sync.Mutex)
 	mtx.Lock()
 
-	return func() { mtx.Unlock() }
+	return func() {
+		mtx.Unlock()
+		m.mutexes.Delete(key)
+	}
 }
