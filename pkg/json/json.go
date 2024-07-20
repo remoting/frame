@@ -52,3 +52,18 @@ func StringToArray(data string) (Array, error) {
 	}
 	return obj, nil
 }
+func AnyToJsonString(obj any) (string, error) {
+	jsonStr, err := json.Marshal(obj)
+	if err != nil {
+		return "", err
+	}
+	return string(jsonStr), nil
+}
+func JsonStringToAny[T any](str string) (T, error) {
+	var t T
+	err := json.Unmarshal([]byte(str), &t)
+	if err != nil {
+		return t, err
+	}
+	return t, nil
+}
