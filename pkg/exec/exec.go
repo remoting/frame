@@ -1,13 +1,12 @@
 package exec
 
 import (
-	"bytes"
 	"os/exec"
 )
 
 type Result struct {
-	Output bytes.Buffer
-	ErrMsg bytes.Buffer
+	Output []byte
+	ErrMsg []byte
 	Error  error
 }
 type Executor interface {
