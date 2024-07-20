@@ -1,6 +1,9 @@
 package requests
 
-import "context"
+import (
+	"context"
+	"io"
+)
 
 var _httpclient = NewHttpClient(30)
 
@@ -19,6 +22,9 @@ func PostUrlData(url string, params, header map[string]string) (*HttpResponse, e
 }
 func PostJson(url string, data map[string]any, header map[string]string) (*HttpResponse, error) {
 	return _httpclient.PostJson(context.Background(), url, data, header)
+}
+func PostBody(url string, body io.Reader, header map[string]string) (*HttpResponse, error) {
+	return _httpclient.PostBody(context.Background(), url, body, header)
 }
 func PostFile(url string, files []*FormFile, params, header map[string]string) (*HttpResponse, error) {
 	return _httpclient.PostFile(context.Background(), url, files, params, header)

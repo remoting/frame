@@ -140,7 +140,7 @@ func (cli *HttpClient) PostJson(ctx context.Context, url string, data map[string
 	}
 	return cli.httpRequest(ctx, "POST", url, _header, strings.NewReader(_body))
 }
-func (cli *HttpClient) PostBody(ctx context.Context, url string, header map[string]string, body io.Reader) (*HttpResponse, error) {
+func (cli *HttpClient) PostBody(ctx context.Context, url string, body io.Reader, header map[string]string) (*HttpResponse, error) {
 	_header := cli.initHeader(header)
 	return cli.httpRequest(ctx, "POST", url, _header, body)
 }
