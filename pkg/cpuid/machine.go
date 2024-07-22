@@ -1,7 +1,7 @@
 package cpuid
 
 import (
-	"crypto/sha256"
+	"crypto/md5"
 	"encoding/hex"
 	"fmt"
 	cpuinfo "github.com/klauspost/cpuid/v2"
@@ -12,6 +12,7 @@ import (
 )
 
 func getProcessorID() (string, error) {
+	//cat /proc/cpuinfo | grep name | awk -F ':' '{print $2}' | sed 's/^ //;s/ $//'
 	return cpuinfo.CPU.BrandName, nil
 }
 
@@ -38,6 +39,19 @@ func getBaseBoardSerialNumber() (string, error) {
 		return "", fmt.Errorf("unsupported platform")
 	}
 }
+func getDiskDriveSerialNumber() (string, error) {
+	switch runtime.GOOS {
+	case "windows":
+		return getWindowsWMIValue("Win32_DiskDrive", "SerialNumber")
+	case "linux":
+		return getUnixCmdOutput("lsblk -o UUID | grep -v ^$ | awk 'NR>1 {print $1; exit}'")
+	case "darwin":
+		return getUnixCmdOutput("diskutil info / | grep 'Volume UUID' | awk '{print $3}'")
+	default:
+		return "", fmt.Errorf("unsupported platform")
+	}
+}
+
 func getLinuxFileContent(path string) (string, error) {
 	content, err := os.ReadFile(path)
 	if err != nil {
@@ -73,12 +87,16 @@ func GenerateMachineCode() (string, error) {
 	if err != nil {
 		return "", err
 	}
+	diskSerial, err := getDiskDriveSerialNumber()
+	if err != nil {
+		return "", err
+	}
 
 	// Concatenate all parts
-	combined := processorID + baseBoardSerial
+	combined := processorID + baseBoardSerial + diskSerial
 
 	// Hash the combined string to generate a machine code
-	hash := sha256.New()
+	hash := md5.New()
 	hash.Write([]byte(combined))
 	machineCode := hex.EncodeToString(hash.Sum(nil))
 
