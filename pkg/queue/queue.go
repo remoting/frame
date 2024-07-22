@@ -2,7 +2,7 @@ package queue
 
 import (
 	"github.com/remoting/frame/pkg/conv"
-	"github.com/remoting/frame/pkg/goroutine"
+	"github.com/remoting/frame/pkg/routine"
 	"sync"
 	"time"
 )
@@ -56,7 +56,7 @@ func (dq *Queue) next() {
 	for key, value := range dq.buffer {
 		if time.Now().After(value) {
 			if dq.hook != nil {
-				goroutine.SafeGo(func(args ...any) {
+				routine.SafeGo(func(args ...any) {
 					dq.hook(conv.String(args[0]))
 				}, key)
 			}
