@@ -3,55 +3,17 @@ package cpuid
 import (
 	"crypto/md5"
 	"encoding/hex"
-	"fmt"
-	cpuinfo "github.com/klauspost/cpuid/v2"
+	"errors"
+	cpu "github.com/klauspost/cpuid/v2"
 	"os"
 	"os/exec"
 	"runtime"
 	"strings"
 )
 
-func getProcessorID() (string, error) {
-	//cat /proc/cpuinfo | grep name | awk -F ':' '{print $2}' | sed 's/^ //;s/ $//'
-	return cpuinfo.CPU.BrandName, nil
+func getCpuInfo() cpu.CPUInfo {
+	return cpu.CPU
 }
-
-func getBaseBoardSerialNumber() (string, error) {
-	switch runtime.GOOS {
-	case "windows":
-		return getWindowsWMIValue("Win32_BaseBoard", "SerialNumber")
-		//return getBaseBoardSerialNumber()
-	case "linux":
-		// Check for multiple possible sources
-		if serial, err := getLinuxFileContent("/sys/class/dmi/id/board_serial"); err == nil && serial != "" {
-			return serial, nil
-		}
-		if machineID, err := getLinuxFileContent("/etc/machine-id"); err == nil && machineID != "" {
-			return machineID, nil
-		}
-		if machineID, err := getLinuxFileContent("/var/lib/dbus/machine-id"); err == nil && machineID != "" {
-			return machineID, nil
-		}
-		return "", fmt.Errorf("baseboard serial number not available")
-	case "darwin":
-		return getUnixCmdOutput("ioreg -l | grep IOPlatformSerialNumber | awk -F '=' '{print $2}' | tr -d ' ' | tr -d '\"'")
-	default:
-		return "", fmt.Errorf("unsupported platform")
-	}
-}
-func getDiskDriveSerialNumber() (string, error) {
-	switch runtime.GOOS {
-	case "windows":
-		return getWindowsWMIValue("Win32_DiskDrive", "SerialNumber")
-	case "linux":
-		return getUnixCmdOutput("lsblk -o UUID | grep -v ^$ | awk 'NR>1 {print $1; exit}'")
-	case "darwin":
-		return getUnixCmdOutput("diskutil info / | grep 'Volume UUID' | awk '{print $3}'")
-	default:
-		return "", fmt.Errorf("unsupported platform")
-	}
-}
-
 func getLinuxFileContent(path string) (string, error) {
 	content, err := os.ReadFile(path)
 	if err != nil {
@@ -78,26 +40,39 @@ func getUnixCmdOutput(cmd string) (string, error) {
 }
 
 func GenerateMachineCode() (string, error) {
-	processorID, err := getProcessorID()
-	if err != nil {
-		return "", err
+	var tmp string
+	if runtime.GOOS == "darwin" {
+		tmp, _ = getUnixCmdOutput("ioreg -l | grep IOPlatformSerialNumber | awk -F '=' '{print $2}' | tr -d ' ' | tr -d '\"'")
+		if tmp == "" {
+			tmp, _ = getUnixCmdOutput("diskutil info / | grep 'Volume UUID' | awk '{print $3}'")
+		}
+		if tmp == "" {
+			return "", errors.New("machine code error")
+		}
+	} else if runtime.GOOS == "linux" {
+		tmp, _ = getLinuxFileContent("/etc/machine-id")
+		if tmp == "" {
+			tmp, _ = getLinuxFileContent("/var/lib/dbus/machine-id")
+		}
+		if tmp == "" {
+			serial, _ := getLinuxFileContent("/sys/class/dmi/id/board_serial")
+			disk, _ := getUnixCmdOutput("lsblk -o UUID | grep -v ^$ | awk 'NR>1 {print $1; exit}'")
+			tmp = getCpuInfo().BrandName + serial + disk
+		}
+		if tmp == "" {
+			return "", errors.New("machine code error")
+		}
+	} else if runtime.GOOS == "windows" {
+		serial, _ := getWindowsWMIValue("Win32_BaseBoard", "SerialNumber")
+		disk, _ := getWindowsWMIValue("Win32_DiskDrive", "SerialNumber")
+		tmp = getCpuInfo().BrandName + serial + disk
+		if tmp == "" {
+			return "", errors.New("machine code error")
+		}
 	}
 
-	baseBoardSerial, err := getBaseBoardSerialNumber()
-	if err != nil {
-		return "", err
-	}
-	diskSerial, err := getDiskDriveSerialNumber()
-	if err != nil {
-		return "", err
-	}
-
-	// Concatenate all parts
-	combined := processorID + baseBoardSerial + diskSerial
-
-	// Hash the combined string to generate a machine code
 	hash := md5.New()
-	hash.Write([]byte(combined))
+	hash.Write([]byte(tmp))
 	machineCode := hex.EncodeToString(hash.Sum(nil))
 
 	return machineCode, nil
