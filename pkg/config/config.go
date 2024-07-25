@@ -25,7 +25,7 @@ type _config struct {
 	Database *Database      `json:"database,omitempty"`
 	Version  string         `json:"version"`
 	UiDir    string         `json:"ui-dir,omitempty"`
-	Bind     string         `json:"bind"`
+	Bind     string         `json:"bind,omitempty"`
 	Custom   map[string]any `json:"custom"`
 }
 
@@ -40,9 +40,6 @@ func InitOnStart(file string) {
 	err = json.Unmarshal(configBytes, &Value)
 	if err != nil {
 		logger.Error("error:%v", err)
-	}
-	if Value.Bind == "" {
-		Value.Bind = "0.0.0.0:6383"
 	}
 }
 

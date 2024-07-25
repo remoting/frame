@@ -10,8 +10,8 @@ import (
 )
 
 // Login 登录操作
-func Login(r http.ResponseWriter, userID string, tokenKey string) (string, errors.RestError) {
-	token, err := GenToken(userID, tokenKey)
+func Login(r http.ResponseWriter, userID string, tokenKey string, expires time.Duration) (string, errors.RestError) {
+	token, err := GenToken(userID, tokenKey,expires)
 	if err != nil {
 		return token, errors.NewRestError(10, "Token生成错误")
 	} else {
@@ -22,8 +22,8 @@ func Login(r http.ResponseWriter, userID string, tokenKey string) (string, error
 }
 
 // LoginByApp 登录操作
-func LoginByApp(userID string, tokenKey string) (string, error) {
-	token, err := GenToken(userID, tokenKey)
+func LoginByApp(userID string, tokenKey string, expires time.Duration) (string, error) {
+	token, err := GenToken(userID, tokenKey,  expires )
 	if err != nil {
 		return "", err
 	} else {
@@ -52,14 +52,15 @@ func GetTokenByRequest(r *gin.Context) string {
 	}
 	return token
 }
-func GenToken(userID string, tokenSecret string) (string, error) {
+func GenToken(userID string, tokenSecret string, expires time.Duration) (string, error) {
 	key, err := jwt.ParseRSAPrivateKeyFromPEM([]byte(strings.TrimSpace(tokenSecret)))
 	if err != nil {
 		return "", err
 	}
 	token := jwt.New(jwt.SigningMethodRS256)
 	claims := make(jwt.MapClaims)
-	claims["exp"] = time.Now().Add(time.Hour * time.Duration(24)).Unix()
+	//time.Hour * time.Duration(24)
+	claims["exp"] = time.Now().Add(expires).Unix()
 	claims["iat"] = time.Now().Unix()
 	claims["uid"] = userID
 	token.Claims = claims
