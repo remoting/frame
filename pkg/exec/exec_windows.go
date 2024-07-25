@@ -1,6 +1,7 @@
 package exec
 
 import (
+	"bytes"
 	"fmt"
 	"os"
 	"os/exec"
@@ -11,32 +12,20 @@ type OSExecutor struct{}
 
 func (*OSExecutor) OsExec(cmd string) *Result {
 	env := os.Environ()
-
 	command := exec.Command("cmd.exe")
 	cdir, _ := os.Getwd()
 	command.Dir = cdir
 	command.SysProcAttr = &syscall.SysProcAttr{CmdLine: fmt.Sprintf(`/c %s`, cmd), HideWindow: true}
 	command.Env = env
-	exitCode := 0
-	output, err := command.CombinedOutput()
-	//fmt.Println(string(output))
 
-	if err != nil {
-		// 命令执行出错
-		exitErr, ok := err.(*exec.ExitError)
-		if ok {
-			// 获取命令的退出状态
-			exitCode = exitErr.ExitCode()
-		}
-	}
-	//output = []byte(ConvertByte2String(output, "GB18030"))
-
-	//fmt.Println(string(output))
-	return &Result{
-		Code: exitCode,
-		Data: output,
-		Err:  err,
-	}
+	result := &Result{}
+	var stdoutBuf, stderrBuf bytes.Buffer
+	command.Stdout = &stdoutBuf
+	command.Stderr = &stderrBuf
+	result.Error = command.Run()
+	result.Output = stdoutBuf.Bytes()
+	result.ErrMsg = stderrBuf.Bytes()
+	return result
 }
 func (*OSExecutor) OsRun(cmd string) error {
 
