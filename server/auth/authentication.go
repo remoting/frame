@@ -45,7 +45,7 @@ func (auth *Authentication) isAnonymousPath(path string) bool {
 
 func (auth *Authentication) HandlerFunc() gin.HandlerFunc {
 	var authorization Authorization
-	if auth.GetAuthService() == nil {
+	if auth.GetAuthService == nil || auth.GetAuthService() == nil {
 		authorization = &DefaultAuthorization{}
 	} else {
 		authorization = auth.GetAuthService()
