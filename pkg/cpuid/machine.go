@@ -1,8 +1,6 @@
 package cpuid
 
 import (
-	"crypto/md5"
-	"encoding/hex"
 	"errors"
 	cpu "github.com/klauspost/cpuid/v2"
 	"os"
@@ -50,14 +48,16 @@ func GenerateMachineCode() (string, error) {
 			return "", errors.New("machine code error")
 		}
 	} else if runtime.GOOS == "linux" {
+		tmp, _ = getUnixCmdOutput("lsblk -o UUID | grep -v ^$ | awk 'NR>1 {print $1; exit}'")
+		if tmp != "" {
+			return getCpuInfo().BrandName+"-"+tmp,nil
+		}
 		tmp, _ = getLinuxFileContent("/etc/machine-id")
 		if tmp == "" {
 			tmp, _ = getLinuxFileContent("/var/lib/dbus/machine-id")
 		}
-		if tmp == "" {
-			serial, _ := getLinuxFileContent("/sys/class/dmi/id/board_serial")
-			disk, _ := getUnixCmdOutput("lsblk -o UUID | grep -v ^$ | awk 'NR>1 {print $1; exit}'")
-			tmp = getCpuInfo().BrandName + serial + disk
+		if tmp != "" {
+			return getCpuInfo().BrandName+"-"+tmp,nil
 		}
 		if tmp == "" {
 			return "", errors.New("machine code error")
@@ -70,10 +70,5 @@ func GenerateMachineCode() (string, error) {
 			return "", errors.New("machine code error")
 		}
 	}
-
-	hash := md5.New()
-	hash.Write([]byte(tmp))
-	machineCode := hex.EncodeToString(hash.Sum(nil))
-
-	return machineCode, nil
+	return tmp, nil
 }

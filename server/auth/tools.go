@@ -83,3 +83,9 @@ func VerifyToken(tokenSecret, tokenString string) (string, error) {
 	}
 	return "", err
 }
+func ParseToken( tokenString string) (*jwt.Token,[]string, error) {
+	parser := &jwt.Parser{
+		SkipClaimsValidation: true,
+	}
+	return parser.ParseUnverified(tokenString,jwt.MapClaims{})
+}
