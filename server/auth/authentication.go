@@ -13,25 +13,28 @@ type UserService interface {
 	GetUserById(id string) (web.User, error)
 }
 
-// AuthService  授权服务
-type AuthService interface {
+// Authorization  授权服务
+type Authorization interface {
 	Authorization(c *web.Context) bool
 }
 
 var tokenName = "jwt-token"
 
+type AuthConfig struct {
+	GetAuthService   func() Authorization //授权服务
+	GetUserService   func() UserService   //用户信息服务
+	GetTokenSecret   func() string        //jwt Token 验证公钥
+	GetAnonymousPath func() []string      //匿名可访问路径
+}
 type Authentication struct {
-	AuthService   AuthService //授权服务
-	UserService   UserService //用户信息服务
-	TokenSecret   string      //jwt Token 验证公钥
-	AnonymousPath []string    //匿名可访问路径
+	AuthConfig
 }
 
 func (auth *Authentication) isAnonymousPath(path string) bool {
 	if path == "/" {
 		return true
 	}
-	for _, v := range auth.AnonymousPath {
+	for _, v := range auth.GetAnonymousPath() {
 		isMatch, _ := regexp.MatchString(v, path)
 		if isMatch {
 			return true
@@ -40,9 +43,12 @@ func (auth *Authentication) isAnonymousPath(path string) bool {
 	return false
 }
 
-func (auth *Authentication) Auth() gin.HandlerFunc {
-	if auth.AuthService == nil {
-		auth.AuthService = &DefaultAuthService{}
+func (auth *Authentication) HandlerFunc() gin.HandlerFunc {
+	var authorization Authorization
+	if auth.GetAuthService() == nil {
+		authorization = &DefaultAuthorization{}
+	} else {
+		authorization = auth.GetAuthService()
 	}
 	return func(c *gin.Context) {
 		_token := GetTokenByRequest(c)
@@ -67,7 +73,7 @@ func (auth *Authentication) Auth() gin.HandlerFunc {
 			context := &web.Context{
 				Context: c,
 			}
-			if auth.AuthService.Authorization(context) {
+			if authorization.Authorization(context) {
 				c.Next()
 			} else {
 				c.JSON(403, map[string]interface{}{
@@ -82,7 +88,7 @@ func (auth *Authentication) Auth() gin.HandlerFunc {
 }
 
 func (auth *Authentication) setUserInfoByID(token, userID string) web.User {
-	userInfo, err := auth.UserService.GetUserById(userID)
+	userInfo, err := auth.GetUserService().GetUserById(userID)
 	if err != nil {
 		logger.Warn("Error,%s", err.Error())
 		return nil
@@ -102,7 +108,7 @@ func (auth *Authentication) getUserByRequest(r *gin.Context) web.User {
 	if len(token) <= 0 {
 		return nil
 	}
-	userID, err := VerifyToken(auth.TokenSecret, token)
+	userID, err := VerifyToken(auth.GetTokenSecret(), token)
 	if err == nil && len(userID) > 0 {
 		// 内存缓存里面有就获取出来返回，如果没有就从数据库获取出来放入缓存
 		userInfo := Get(token)

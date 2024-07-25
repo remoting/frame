@@ -4,10 +4,10 @@ import (
 	"github.com/remoting/frame/server/web"
 )
 
-type DefaultAuthService struct {
+type DefaultAuthorization struct {
 }
 
-func (_ *DefaultAuthService) Authorization(c *web.Context) bool {
+func (_ *DefaultAuthorization) Authorization(c *web.Context) bool {
 	user, exists := c.Get("__userInfo__")
 	if exists {
 		_, ok := user.(web.User)
