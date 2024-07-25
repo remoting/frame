@@ -12,6 +12,30 @@ import (
 	"os"
 )
 
+func GenRsaPemKey(bits int) (string,string, error) {
+	// 生成 RSA 私钥
+	privateKey, err := rsa.GenerateKey(rand.Reader, bits)
+	if err != nil {
+		return "","",err
+	}
+	// 将私钥编码成 PEM 格式
+	privateKeyPEM := pem.EncodeToMemory(&pem.Block{
+		Type:  "RSA PRIVATE KEY",
+		Bytes: x509.MarshalPKCS1PrivateKey(privateKey),
+	})
+	// 提取公钥
+	publicKey := privateKey.PublicKey
+	// 将公钥编码成 PEM 格式
+	publicKeyBytes, err := x509.MarshalPKIXPublicKey(&publicKey)
+	if err != nil {
+		return "","",err
+	}
+	publicKeyPEM := pem.EncodeToMemory(&pem.Block{
+		Type:  "RSA PUBLIC KEY",
+		Bytes: publicKeyBytes,
+	})
+	return string(privateKeyPEM),string(publicKeyPEM),nil
+}
 func GenerateRsaKey(bits int) error {
 	// 1. 生成私钥文件
 	// GenerateKey函数使用随机数据生成器random生成一对具有指定字位数的RSA密钥
