@@ -45,14 +45,17 @@ func NewDisableClient(timeout int) *HttpClient {
 		client: &http.Client{
 			Timeout: time.Duration(timeout) * time.Second,
 			Transport: &http.Transport{
-				// 禁用连接池
-				DisableKeepAlives: true,
-				// 确保没有空闲连接
-				MaxIdleConnsPerHost: 0,
+				DisableKeepAlives: false,
+				// 设置合理的空闲连接数
+				MaxIdleConnsPerHost: 2,
+				// 设置所有主机的最大空闲连接数
+				MaxIdleConns: 10,
+				// 设置空闲连接的最大空闲时间
+				IdleConnTimeout: 90 * time.Second,
 				// 设置连接超时
 				DialContext: (&net.Dialer{
 					Timeout:   5 * time.Second,
-					KeepAlive: 0,
+					KeepAlive: 30 * time.Second,
 				}).DialContext,
 				// 设置TLS连接超时
 				TLSHandshakeTimeout: 5 * time.Second,
