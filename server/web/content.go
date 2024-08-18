@@ -19,6 +19,15 @@ type Context struct {
 	*gin.Context
 }
 
+func (c *Context) ClientIP() string {
+	if c.GetHeader("RemoteIp") != "" {
+		return c.GetHeader("RemoteIp")
+	}
+	if c.GetHeader("X-Real-IP") != "" {
+		return c.GetHeader("RemoteIp")
+	}
+	return c.Context.ClientIP()
+}
 func (c *Context) BindOBJ(t any) {
 	err := c.BindJSON(t)
 	c.CheckError(err)
