@@ -24,7 +24,7 @@ func (c *Context) ClientIP() string {
 		return c.GetHeader("RemoteIp")
 	}
 	if c.GetHeader("X-Real-IP") != "" {
-		return c.GetHeader("RemoteIp")
+		return c.GetHeader("X-Real-IP")
 	}
 	return c.Context.ClientIP()
 }
