@@ -48,3 +48,19 @@ func (sm *SyncMap[K, V]) Range(f func(key K, value V) bool) {
 		}
 	}
 }
+
+// Reset renew empty map.
+func (sm *SyncMap[K, V]) Reset() {
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
+	sm.m = make(map[K]V)
+}
+
+// Clear removes all keys from the map.
+func (sm *SyncMap[K, V]) Clear() {
+	sm.mu.Lock()
+	defer sm.mu.Unlock()
+	for k, _ := range sm.m {
+		delete(sm.m, k)
+	}
+}
